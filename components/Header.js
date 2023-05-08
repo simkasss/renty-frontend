@@ -2,15 +2,12 @@ import { ConnectButton } from "web3uikit"
 import Link from "next/link"
 import { useMoralis } from "react-moralis"
 import { useState, useEffect } from "react"
+import { ethers } from "ethers"
+import { useSelector } from "react-redux"
+import { connectWallet, truncate, monitorWalletConnection } from "@/constants/blockchain"
 
 export default function Header() {
-    //WHY IS THIS NOT WORKING
-    const { isAuthenticated, logout } = useMoralis()
-    const [authenticated, setAuthenticated] = useState(isAuthenticated)
-
-    useEffect(() => {
-        setAuthenticated(isAuthenticated)
-    }, [isAuthenticated])
+    const { wallet } = useSelector((states) => states.globalStates)
 
     return (
         <nav className="nav-bar">
@@ -22,7 +19,7 @@ export default function Header() {
                 <Link href="/properties" className="nav-link">
                     Apartments
                 </Link>
-                {!authenticated && (
+                {wallet && (
                     <>
                         <Link href="/myproperties" className="nav-link">
                             My Properties
@@ -38,10 +35,11 @@ export default function Header() {
                         </Link>
                     </>
                 )}
-                <ConnectButton moralisAuth={false} />
-                {!authenticated && (
-                    <button className="logout-button" onClick={() => logout()}>
-                        Logout
+                {wallet ? (
+                    <button className="button-connect">{truncate(wallet, 4, 4, 10)}</button>
+                ) : (
+                    <button onClick={connectWallet} className="button-connect">
+                        connect
                     </button>
                 )}
             </div>

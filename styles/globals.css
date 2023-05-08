@@ -22,7 +22,22 @@ body {
 }
 .nav-bar {
     background-color: #ba953f;
+}
+.footer div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     color: darkgrey;
+}
+.footer {
+    background-color: #ba953f;
+    color: darkgrey;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
 }
 .button-standart {
     background-color: white;
@@ -35,7 +50,24 @@ body {
     margin-bottom: 0.7rem;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
+
 .button-standart:hover {
+    background-color: #cebb8d;
+    color: #393939;
+}
+.button-connect {
+    background-color: #cebb9d;
+    color: #ba950f;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-right: 0.5rem;
+    margin-bottom: 0.7rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.button-connect:hover {
     background-color: #cebb8d;
     color: #393939;
 }

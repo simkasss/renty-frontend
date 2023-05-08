@@ -2,15 +2,17 @@ import React from "react"
 import { useState } from "react"
 import Link from "next/link"
 
-export function PropertyCard({ id, imageSrc, rentalPrice, availableStartDate, onClick }) {
+export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
     return (
         <>
             <Link href={`/properties/${id}`}>
                 <div className="property-card" role="button" tabIndex={0} onClick={onClick}>
-                    <img src={imageSrc} alt="Property" />
+                    {/* <img src={imageSrc} alt="Property" /> */}
                     <div className="property-details">
-                        <div className="property-rental-price">${rentalPrice}/month</div>
-                        <div className="property-available-start-date">Available from {availableStartDate}</div>
+                        <div className="property-rental-price">{name}</div>
+                        <div className="property-rental-price">{rentalPrice} ETH</div>
+                        <div className="property-available-start-date">Rental Term: {rentalTerm}</div>
+                        <div className="property-available-start-date">Available from: 06.13</div>
                     </div>
                 </div>
             </Link>
@@ -21,7 +23,7 @@ export function PropertyCard({ id, imageSrc, rentalPrice, availableStartDate, on
 export function PropertyDetails({ property, onBack }) {
     const [applyForm, setApplyForm] = useState(false)
     const [name, setName] = useState("")
-    const [startDate, setStartDate] = useState(property.startDate)
+    const [startDate, setStartDate] = useState("")
     const [rentalPrice, setRentalPrice] = useState(property.rentalPrice)
     const [depositAmount, setDepositAmount] = useState(property.depositAmount)
 
@@ -64,23 +66,25 @@ export function PropertyDetails({ property, onBack }) {
                     </button>
                 </form>
             )}
-            <div>
+            {/* <div>
                 {property.imageSrc.map((imageSrc) => (
                     <img className="property-details-image" key={imageSrc} src={imageSrc} alt={`Property ${property.id}`} />
                 ))}
-            </div>
+            </div> */}
             <div className="property-info">
-                <h2>{`Property ${property.id}`}</h2>
+                <h2>{`${property.name}`}</h2>
                 <p className="standartbolded">Rental Price </p>
-                <p>${property.rentalPrice}/month</p>
+                <p>${property.rentalPrice} ETH/month</p>
                 <p className="standartbolded">Deposit:</p>
-                <p>{property.depositAmount}</p>
+                <p>{property.depositAmount} ETH</p>
                 <p className="standartbolded">Number of rooms:</p>
                 <p>{property.numberOfRooms}</p>
                 <p className="standartbolded">Square meters:</p>
                 <p>{property.squareMeters}</p>
                 <p className="standartbolded">Description:</p>
                 <p>{property.description}</p>
+                <p className="standartbolded">Property NFT id:</p>
+                <p>{property.propertyNftId}</p>
                 <p className="standartbolded">Hash of Terms and Conditions:</p>
                 <p>Ox87K23JKjs</p>
                 <div className="review-section">
