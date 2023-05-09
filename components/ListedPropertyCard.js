@@ -1,6 +1,6 @@
 import React from "react"
 
-export function ListedPropertyCard({ imageSrc, id, rentalPrice, availableStartDate, onClick, status }) {
+export function ListedPropertyCard({ id, rentalPrice, availableStartDate, onClick }) {
     return (
         <div className="property-card" role="button" tabIndex={0} onClick={onClick}>
             {/*<img src={imageSrc} alt="Property" />*/}
@@ -8,7 +8,7 @@ export function ListedPropertyCard({ imageSrc, id, rentalPrice, availableStartDa
                 <div className="property-rental-price">Property Nft ID: {id}</div>
                 <div className="property-rental-price">${rentalPrice} ETH/month</div>
                 <div className="property-available-start-date">Available from {availableStartDate}</div>
-                <div className="property-status">{status}</div>
+                <div className="property-status">status</div>
             </div>
         </div>
     )

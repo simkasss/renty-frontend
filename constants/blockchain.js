@@ -42,14 +42,16 @@ const getUserProperties = async () => {
     try {
         const wallet = store.getState().globalStates.wallet
         console.log("wallet", wallet)
-        const contract = await serversideEthereumContract()
+        console.log("........")
+        console.log("Calling clientSideEthereumContract")
+        const contract = await clientSideEthereumContract()
         const userProperties = await contract.getUserProperties("0x526566ee13Ec5a1f92075C72908879Ccadf2AB61")
         return structureProperties(userProperties)
     } catch (error) {
         console.log(error)
     }
 }
-
+// "0x526566ee13Ec5a1f92075C72908879Ccadf2AB61"
 const mintPropertyNft = async (tokenURI) => {
     try {
         if (!ethereum) return reportError("Please install Metamask")

@@ -7,9 +7,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { getUserProperties } from "@/constants/blockchain"
 
-export default function MyProperties({ userProperties }) {
-    console.log("my listedProperties", userProperties)
-    const properties = userProperties
+export default function MyProperties() {
     const [selectedProperty, setSelectedProperty] = useState(null)
 
     const router = useRouter()
@@ -51,7 +49,7 @@ export default function MyProperties({ userProperties }) {
                             <button className="button-standart">Not Listed Properties</button>
                             <div className="properties-grid">
                                 <div className="standartbolded">Properties listed for rent:</div>
-                                {properties.map((property) => (
+                                {exampleUserProperties.map((property) => (
                                     <ListedPropertyCard
                                         key={property.propertyNftId}
                                         id={property.propertyNftId}
@@ -69,17 +67,6 @@ export default function MyProperties({ userProperties }) {
             </div>
         </div>
     )
-}
-
-export const getServerSideProps = async () => {
-    const data = await getUserProperties()
-    if (data == null) {
-        console.log("getUserProperties returned null or undefined")
-        return { props: {} }
-    }
-    return {
-        props: { userProperties: JSON.parse(JSON.stringify(data)) },
-    }
 }
 
 const exampleUserProperties = [

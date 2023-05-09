@@ -1,11 +1,58 @@
-NavBar -> Home Listings My Properties My Rentals Messages Account Contacts
+TODOs:
 
-1. Home page: Main landing page of the website that provides an overview of the service and its features.
-2. Listings page: Display all the available properties for rent, with information such as property images, rental terms, rent prices, and deposit amounts. Users can filter the listings based on their preferences. Tenants can apply for a selected property.
-3. Property details page: Show the detailed information about a particular selected property (hash of terms and conditions document, description, reviews).
-4. My Rentals (Tenant dashboard): After signing up, this page will let create a soulbound token. When the soulbound token is created, the page will show tenants status of their rental applications(denied, active, signed), if the application status is “signed” a tenant can select the application and sign a rental agreement. The page will also show rented properties(current and past), after selecting a property a tenant will see rental agreement page. After selecting a past rented property, a tenant can also create a review about a property.
-5. My Properties (Owner dashboard): After signing up, this page will allow registered property owners to request for property’s NFT and list a property (when NFT is minted). The page will show owners listings (rented and not rented). After selecting a listing an owner can check rental history and if the property is not rented an owner can screen tenants and sign rental agreements, if the property is rented an owner will se rental agreement page. In rental history an owner can create a review about a tenant.
-6. Rental agreement page: Both tenant and owner has access to this page after selecting rental agreement in their dashboard. This page will display the rental agreement between the property owner and the tenant (terms and conditions, rental period, rent price, deposit amount, and maintenance responsibilities, payment history). Both tenant or owner can create a dispute. A tenant can select to pay rent or pay deposits, can request for maintenance, can request for renewal. An owner can create a review about a tenant.
-7. Messages: Users can send and receive messages to the other party of rental agreement.
-8. Account: User can view and manage their account settings, such as their contact details.
-9. Contacts: This page will provide contact information for support and customer service.
+1. HOME
+   Add overview of the service and its features and add a component of listed properties
+2. APARTMENTS
+
+    1. Add a filter for a country, city, price.
+    2. Comp. PropertyCard should have a name, picture, area, number of rooms, monthtly price.
+    3. Comp. PropertyDetails should have an array of images, name, rental price, depositamount, number of rooms, area, description, propertyNftId, floor, build year, heating type, parking space, equipment and hash of Terms and Conditions, reviews section.
+       Should it have contacts (phone no., email) and start chat button?
+       If I have time:
+       I can add Amenities with icons (Wifi, pets alllowed, washer, workspace, etc.)
+       I can add a map, that would show a propertys place in a map.
+    4. "Apply for Rent" form should call contracts "createRentContract" function.
+       The form should automatically take propertyNftId and tsbtID, a user should input rentalTerm, rentalPrice, depositAmount and startDate.
+       Submitting the form should call the function.
+       Should we leave for user to decide a term for application availability or make it eg. 3 days?
+
+3. MY PROPERTIES
+
+    1. We should get UserProperties and filter only listed properties. Should we add another solidity function to get userListedProperties or should we somehow filter them in the frontend?
+    2. Comp. ListedPropertyCard should have a name, picture, area, monthtly price, available from, status. Maybe day listed?
+    3. Comp. ListedPropertyDetails should have an array of images, rental price, depositamount, number of rooms, area, description, propertyNftId, floor, build year, heating type, parking space, equipment and hash of Terms and Conditions, reviews section.
+       Should we just use PropertyDetails component? We could add additional information after the component.
+       Should we add "Update Property" button and let owner update a property here?
+       Should we eliminate "List property for rent" and just make a "Mint New PropertyNFT" button and other button for "Not Listed Properties".
+        1. "Screen Rent Applications" should open a new page "[address]/properties/[id]/rentApplications"
+           In the page we should call contracts "getRentContracts" function. Should the page display all the applications or only the valid ones? How about application validity time?
+           We could let a user to select a validUntil date and make the frontend show status "invalid" if that date is passed.
+           After selecting a specific application a "Sign Rent Contract" button should call contracts "acceptRentContract" function.
+           Should we make a separate page for each rentApplication?
+        2. "Rent History" should open a new page "[address]/properties/[id]/rentHistory".
+        3. "Mint New PropertyNFT" button should open a form, that would take owner name, address and country code. After pressing "Submit":
+            1. Uploading to NFT.storage function (it is now in the backend ) ,,uploadPropertyNftToStorage" should be called. This function returns tokenURI.
+            2. Contracts "mintPropertyNFT" should be called. This function returns nftTokenId.
+        4. "Not Listed Properties" should display properties, that are not listed (using PropertyCard), also list of nft, that do not have a associated Property created.
+            1. After selecting a property, there should be two buttons "Update Property" and "List Property For Rent".
+               "Update Property" should open a form (like a listPropery form) and also call contracts "updateProperty" function.
+               "List Property for Rent" should call contracts "relistProperty" function.
+            2. Component "PropertyNft" should have a nftTokenId, owner name, address, country code.
+               After clicking on PropertyNft card a listProperty form should apear with these fields:
+               name, description, rentalTerm, rentalPrice, depositAmount, hash (a contracts listProperty function should be called with these),
+               also fields for: number of rooms, area, floor, build year, heating type, parking space, equipment.
+               How can we let user to upload the images of property?
+               How should we implement this form?
+
+4. MY RENTALS "/[address]/myRentals.js"
+   If a wallet address doesnt have a sbt, when a page shows a form for creating soulbound token, that has a "name" field, after submiting a form:
+
+    1. Uploading to NFT.storage function (it is now in the backend ) "uploadSbtToStorage" should be called. This function returns tokenURI.
+    2. Contracts "mintSoulboundToken" with name and tokenURI should be called. This function returns sbtTokenId.
+       If a wallet address has sbtTokenId, when the page shows:
+       "My Rental Applications" button. By pressing this button a page should show "/[address]/myRentalApplications.js"
+       Contracts "getTenantRentContracts" function should be called, that returns a list of RentContracts.
+       If a tenant has a signed Rent Contract, the page should show a current Rent Contract.
+
+5. ACCOUNT
+6. MESSAGES

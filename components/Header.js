@@ -21,7 +21,7 @@ export default function Header() {
                 </Link>
                 {wallet && (
                     <>
-                        <Link href="/myproperties" className="nav-link">
+                        <Link href={`/${wallet}/properties`} className="nav-link">
                             My Properties
                         </Link>
                         <Link href="/myrentals" className="nav-link">

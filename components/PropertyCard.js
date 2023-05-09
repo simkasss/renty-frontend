@@ -12,7 +12,6 @@ export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
                         <div className="property-rental-price">{name}</div>
                         <div className="property-rental-price">{rentalPrice} ETH</div>
                         <div className="property-available-start-date">Rental Term: {rentalTerm}</div>
-                        <div className="property-available-start-date">Available from: 06.13</div>
                     </div>
                 </div>
             </Link>
