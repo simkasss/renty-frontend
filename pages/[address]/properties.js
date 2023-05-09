@@ -23,12 +23,33 @@ export default function Property() {
                 const rentAppAddress = networkMapping["11155111"].RentApp[0]
                 const contractAbi = rentAppAbi
                 const contract = new ethers.Contract(rentAppAddress, contractAbi, provider)
-                userProperties = structureProperties(await contract.getUserProperties(userAddress))
+
+                const [listedPropertiesResponse, userPropertiesResponse] = await Promise.all([
+                    contract.getListedProperties(),
+                    contract.getUserProperties(userAddress),
+                ])
+
+                const listedProperties = structureProperties(listedPropertiesResponse)
+
+                const userProperties = structureProperties(userPropertiesResponse).map((userProperty) => {
+                    userProperty.isListed = false
+
+                    listedProperties.forEach((listedProperty) => {
+                        if (listedProperty.propertyNftId === userProperty.propertyNftId) {
+                            userProperty.isListed = true
+                        }
+                    })
+                    return userProperty
+                })
+
                 return userProperties
             }
         }
-        getUserProperties()
-    })
+
+        getUserProperties().then((properties) => {
+            setProperties(properties)
+        })
+    }, [])
 
     const router = useRouter()
     const handlePropertyClick = (property) => {
@@ -66,17 +87,19 @@ export default function Property() {
                             <button className="button-standart">Not Listed Properties</button>
                             <div className="properties-grid">
                                 <div className="standartbolded">Properties listed for rent:</div>
-                                {/* {properties.map((property) => (
-                                    <ListedPropertyCard
-                                        key={property.propertyNftId}
-                                        id={property.propertyNftId}
-                                        //imageSrc={property.imageSrc[0]}
-                                        rentalPrice={property.rentalPrice}
-                                        //availableStartDate={property.availableStartDate}
-                                        status={property.status}
-                                        onClick={() => handlePropertyClick(property)}
-                                    />
-                                ))} */}
+                                {properties
+                                    .filter((property) => property.isListed)
+                                    .map((property) => (
+                                        <ListedPropertyCard
+                                            key={property.propertyNftId}
+                                            id={property.propertyNftId}
+                                            //imageSrc={property.imageSrc[0]}
+                                            rentalPrice={property.rentalPrice}
+                                            //availableStartDate={property.availableStartDate}
+                                            status={property.status}
+                                            onClick={() => handlePropertyClick(property)}
+                                        />
+                                    ))}
                             </div>
                         </div>
                     )}
