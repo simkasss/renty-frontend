@@ -1,6 +1,6 @@
 import React from "react"
-import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/router"
 
 export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
     return (
@@ -11,7 +11,7 @@ export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
                     <div className="property-details">
                         <div className="property-rental-price">{name}</div>
                         <div className="property-rental-price">{rentalPrice} ETH</div>
-                        <div className="property-available-start-date">Rental Term: {rentalTerm}</div>
+                        <div className="property-available-start-date">Rental Term: {rentalTerm / 60 / 60 / 24} days </div>
                     </div>
                 </div>
             </Link>
@@ -20,19 +20,29 @@ export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
 }
 
 export function PropertyDetails({ property, onBack }) {
-    const [applyForm, setApplyForm] = useState(false)
-    const [name, setName] = useState("")
-    const [startDate, setStartDate] = useState("")
-    const [rentalPrice, setRentalPrice] = useState(property.rentalPrice)
-    const [depositAmount, setDepositAmount] = useState(property.depositAmount)
+    const [numberOfRooms, setNumberOfRooms] = React.useState("")
+    const [area, setArea] = React.useState("")
+    const [floor, setFloor] = React.useState("")
+    const [buildYear, setBuildYear] = React.useState("")
+
+    async function getPropertyData() {
+        const url = `https://gateway.pinata.cloud/ipfs/${property.hashOfMetaData}`
+        await fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
+                setNumberOfRooms(data.numberOfRooms)
+                setArea(data.area)
+                setFloor(data.floor)
+                setBuildYear(data.buildYear)
+            })
+            .catch((error) => console.error(error))
+    }
+    getPropertyData()
+    const router = useRouter()
 
     const handleApplyClick = () => {
-        setApplyForm(!applyForm)
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        // Send form data to backend
+        router.push(`/properties/${property.propertyNftId}/apply-for-rent`)
     }
 
     return (
@@ -40,52 +50,28 @@ export function PropertyDetails({ property, onBack }) {
             <button className="button-standart" onClick={handleApplyClick}>
                 Apply for Rent
             </button>
-            {applyForm && (
-                <form onSubmit={handleSubmit} className="form">
-                    <div className="form-field">
-                        <label>
-                            Name:
-                            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                        </label>
-                    </div>
-                    <label>
-                        Start Date:
-                        <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                    </label>
-                    <label>
-                        Rental Price:
-                        <input type="text" value={rentalPrice} onChange={(e) => setRentalPrice(e.target.value)} />
-                    </label>
-                    <label>
-                        Deposit Amount:
-                        <input type="text" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
-                    </label>
-                    <button type="submit" className="button-standart">
-                        Submit
-                    </button>
-                </form>
-            )}
-            {/* <div>
-                {property.imageSrc.map((imageSrc) => (
-                    <img className="property-details-image" key={imageSrc} src={imageSrc} alt={`Property ${property.id}`} />
-                ))}
-            </div> */}
             <div className="property-info">
                 <h2>{`${property.name}`}</h2>
                 <p className="standartbolded">Rental Price </p>
                 <p>${property.rentalPrice} ETH/month</p>
                 <p className="standartbolded">Deposit:</p>
                 <p>{property.depositAmount} ETH</p>
+                <p className="standartbolded">Rental Term:</p>
+                <p>{property.rentalTerm / 60 / 60 / 24} days</p>
                 <p className="standartbolded">Number of rooms:</p>
-                <p>{property.numberOfRooms}</p>
-                <p className="standartbolded">Square meters:</p>
-                <p>{property.squareMeters}</p>
+                <p>{numberOfRooms}</p>
+                <p className="standartbolded">Area:</p>
+                <p>{area}</p>
+                <p className="standartbolded">Floor:</p>
+                <p>{floor}</p>
+                <p className="standartbolded">Build Year:</p>
+                <p>{buildYear}</p>
                 <p className="standartbolded">Description:</p>
                 <p>{property.description}</p>
                 <p className="standartbolded">Property NFT id:</p>
                 <p>{property.propertyNftId}</p>
                 <p className="standartbolded">Hash of Terms and Conditions:</p>
-                <p>Ox87K23JKjs</p>
+                <p>{property.hashOfRentalAgreement}</p>
                 <div className="review-section">
                     <div className="title">Reviews:</div>
                     <div className="review-card">

@@ -1,11 +1,11 @@
-import "@/styles/globals.css"
+import "../styles/globals.css"
 import { MoralisProvider } from "react-moralis" // in order to use web3uicomponent
-import Header from "@/components/Header"
+import Header from "../components/Header"
 import Head from "next/head"
-import Footer from "@/components/Footer"
+import Footer from "../components/Footer"
 import { Provider } from "react-redux"
-import { store } from "@/store"
-import { monitorWalletConnection } from "@/constants/blockchain"
+import { store } from "../store"
+import { monitorWalletConnection } from "../constants/blockchain"
 import { useEffect, useState } from "react"
 
 export default function App({ Component, pageProps }) {

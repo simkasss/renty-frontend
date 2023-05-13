@@ -5,11 +5,11 @@ import { getListedProperties } from "@/constants/blockchain"
 
 export default function Property({ listedProperties }) {
     const router = useRouter()
-    const { id } = router.query
+    const { propertyId: id } = router.query
 
     // Find the selected property from the properties array using the id parameter.
     const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
-
+    console.log(selectedProperty)
     // If the selected property is not found, show a message.
     if (!selectedProperty) {
         return <div>Property not found</div>

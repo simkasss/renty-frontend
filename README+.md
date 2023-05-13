@@ -18,9 +18,9 @@ TODOs:
 
 3. MY PROPERTIES
 
-    1. We should get UserProperties and filter only listed properties. Should we add another solidity function to get userListedProperties or should we somehow filter them in the frontend?
-    2. Comp. ListedPropertyCard should have a name, picture, area, monthtly price, available from, status. Maybe day listed?
-    3. Comp. ListedPropertyDetails should have an array of images, rental price, depositamount, number of rooms, area, description, propertyNftId, floor, build year, heating type, parking space, equipment and hash of Terms and Conditions, reviews section.
+    1. ✅ We should get UserProperties and filter only listed properties. Should we add another solidity function to get userListedProperties or should we somehow filter them in the frontend?
+    2. Comp. MyPropertyCard should have a name, picture, area, monthtly price, available from, status. Maybe day listed?
+    3. Comp. MyPropertyDetails should have an array of images, rental price, depositamount, number of rooms, area, description, propertyNftId, floor, build year, heating type, parking space, equipment and hash of Terms and Conditions, reviews section.
        Should we just use PropertyDetails component? We could add additional information after the component.
        Should we add "Update Property" button and let owner update a property here?
        Should we eliminate "List property for rent" and just make a "Mint New PropertyNFT" button and other button for "Not Listed Properties".
@@ -30,7 +30,7 @@ TODOs:
            After selecting a specific application a "Sign Rent Contract" button should call contracts "acceptRentContract" function.
            Should we make a separate page for each rentApplication?
         2. "Rent History" should open a new page "[address]/properties/[id]/rentHistory".
-        3. "Mint New PropertyNFT" button should open a form, that would take owner name, address and country code. After pressing "Submit":
+        3. "Create Property" button should open a form, that would take owner name, address and country code. After pressing "Submit":
             1. Uploading to NFT.storage function (it is now in the backend ) ,,uploadPropertyNftToStorage" should be called. This function returns tokenURI.
             2. Contracts "mintPropertyNFT" should be called. This function returns nftTokenId.
         4. "Not Listed Properties" should display properties, that are not listed (using PropertyCard), also list of nft, that do not have a associated Property created.
@@ -56,3 +56,6 @@ TODOs:
 
 5. ACCOUNT
 6. MESSAGES
+
+TODO :
+When a tenant creates another rentapplication for the same property, cancel or edit the old application

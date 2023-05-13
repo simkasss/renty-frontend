@@ -4,7 +4,7 @@ import { useMoralis } from "react-moralis"
 import { useState, useEffect } from "react"
 import { ethers } from "ethers"
 import { useSelector } from "react-redux"
-import { connectWallet, truncate, monitorWalletConnection } from "@/constants/blockchain"
+import { connectWallet, truncate, monitorWalletConnection } from "../constants/blockchain"
 
 export default function Header() {
     const { wallet } = useSelector((states) => states.globalStates)
@@ -24,7 +24,7 @@ export default function Header() {
                         <Link href={`/${wallet}/properties`} className="nav-link">
                             My Properties
                         </Link>
-                        <Link href="/myrentals" className="nav-link">
+                        <Link href={`/${wallet}/myrentals`} className="nav-link">
                             My Rentals
                         </Link>
                         <Link href="/account" className="nav-link">
