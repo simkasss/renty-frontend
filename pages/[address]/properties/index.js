@@ -64,7 +64,10 @@ export default function Property() {
             <div>
                 <div>
                     <div>
-                        <Link href={`/${wallet}/create`} className="link-standart">
+                        <Link
+                            href={`/${wallet}/create`}
+                            className="bg-violet-900 hover:bg-violet-800 text-white font-bold py-2 px-4 rounded max-w-xs"
+                        >
                             Create Property
                         </Link>
                         {properties.length == 0 ? <div>You haven't create any property yet</div> : <></>}

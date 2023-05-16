@@ -60,7 +60,7 @@ export default function listProperty() {
         })
     }, [])
 
-    async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, _hashOfPhotos, _hashOfRentalAggreement) {
+    async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, /*_hashOfPhotos*/ _hashOfRentalAggreement) {
         provider = new ethers.providers.Web3Provider(ethereum)
         signer = provider.getSigner()
         userAddress = await signer.getAddress()
@@ -73,7 +73,7 @@ export default function listProperty() {
             _rentalTerm,
             _rentalPrice,
             _depositAmount,
-            _hashOfPhotos,
+            //_hashOfPhotos,
             _hashOfRentalAggreement
         )
         // Wait for the transaction to be confirmed
@@ -127,7 +127,6 @@ export default function listProperty() {
             console.log("Response: ", response)
         })
 
-        return
         //until here
         // update hashofrentalagreement and add hashofphotos
         await listProperty(description, property.propertyNftId, rentalTerm, rentalPrice, depositAmount, hashOfRentalAggreement)

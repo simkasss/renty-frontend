@@ -1,10 +1,9 @@
 import Head from "next/head"
 import React, { useState } from "react"
-import { PropertyCard } from "@/components/PropertyCard"
-import { PropertyDetails } from "@/components/PropertyCard"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { getListedProperties } from "../constants/blockchain"
+import { PropertyCard } from "../components/PropertyCard"
 
 export default function ListedProperties({ listedProperties }) {
     const properties = listedProperties
@@ -19,23 +18,21 @@ export default function ListedProperties({ listedProperties }) {
                 <title>Listed Properties</title>
             </Head>
 
-            <div>
-                <div>
-                    <div className="properties-grid">
-                        {properties.map((property) => (
-                            <PropertyCard
-                                key={property.propertyNftId}
-                                name={property.name}
-                                id={property.propertyNftId}
-                                rentalPrice={property.rentalPrice}
-                                rentalTerm={property.rentalTerm}
-                                onClick={() => handlePropertyClick(property)}
-                            />
-                        ))}
-                    </div>
-                    <div>
-                        <button className="link-standart">Load More</button>
-                    </div>
+            <div className="container mx-auto px-4 py-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {properties.map((property) => (
+                        <PropertyCard
+                            key={property.propertyNftId}
+                            name={property.name}
+                            id={property.propertyNftId}
+                            rentalPrice={property.rentalPrice}
+                            rentalTerm={property.rentalTerm}
+                            onClick={() => handlePropertyClick(property)}
+                        />
+                    ))}
+                </div>
+                <div className="flex justify-center mt-4">
+                    <button className=" bg-violet-900 hover:bg-violet-800 text-white font-bold py-2 px-4 rounded">Load More</button>
                 </div>
             </div>
         </div>
