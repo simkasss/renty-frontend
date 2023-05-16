@@ -48,7 +48,7 @@ export function MyPropertyDetails({ property, onBack }) {
                     <p>{`Property Id: ${property.propertyNftId}`}</p>
                     <p>{`Status: ${property.isRented === true ? "Rented" : "Vacant"}`}</p>
                     <p>{`Rental Price: ${property.rentalPrice} ETH/month`}</p>
-                    <p>{`Rental Term: ${property.rentalTerm}`}</p>
+                    <p>{`Rental Term: ${property.rentalTerm / 24 / 60 / 60} days`}</p>
                     <p>{`Deposit Amount: ${property.depositAmount} ETH`}</p>
                     <p>{`Number of rooms: ${numberOfRooms}`}</p>
                     <p>{`Area: ${area}`}</p>

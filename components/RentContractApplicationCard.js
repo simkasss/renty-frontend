@@ -7,6 +7,14 @@ import rentAppAbi from "../constants/RentApp.json"
 import { useSelector } from "react-redux"
 import { structureRentContracts, structureProperty } from "../utilities/structureStructs"
 
+function convertTimestampToDate(timestampInSeconds) {
+    const date = new Date(timestampInSeconds * 1000)
+    const year = date.getFullYear()
+    const month = ("0" + (date.getMonth() + 1)).slice(-2)
+    const day = ("0" + date.getDate()).slice(-2)
+    return `${year}/${month}/${day}`
+}
+
 export function RentContractApplicationCard({ rentContract }) {
     let status
     if (rentContract.status === 0) {
@@ -35,6 +43,7 @@ export function RentContractApplicationCard({ rentContract }) {
         await acceptContract()
         console.log("Contract ", rentContract.id, " accepted!")
     }
+    const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
 
     return (
         <div className="rent-contract-card">
@@ -51,7 +60,7 @@ export function RentContractApplicationCard({ rentContract }) {
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Rental Term:</div>
-                        <div className="detail-value">{rentContract.rentalTerm}</div>
+                        <div className="detail-value">{rentContract.rentalTerm / 24 / 60 / 60} days</div>
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Rental Price:</div>
@@ -63,27 +72,40 @@ export function RentContractApplicationCard({ rentContract }) {
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Start Date:</div>
-                        <div className="detail-value">{rentContract.startDate}</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.startTimestamp)}</div>
                     </div>
                     <div className="detail-row">
+                        <div className="detail-label">Application Valid Until:</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.validityTerm)}</div>
+                    </div>
+
+                    <div className="detail-row">
                         <div className="detail-label">Status:</div>
-                        <div className="detail-value status">{status}</div>
+                        {rentContract.validityTerm < nowTimestampInSeconds ? (
+                            <div className="detail-value status">Application is expired</div>
+                        ) : (
+                            <div className="detail-value status">{status}</div>
+                        )}
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Hash of Terms and Conditions:</div>
                         <div className="detail-value">{/* ADD HASH HERE */}</div>
                     </div>
                     <button className="button-sign"> Contact Tenant</button>
-                    <button className="button-sign" onClick={handleAcceptClick}>
-                        Accept Contract
-                    </button>
+                    {rentContract.validityTerm < nowTimestampInSeconds ? (
+                        <></>
+                    ) : (
+                        <button className="button-sign" onClick={handleAcceptClick}>
+                            Accept Contract
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
     )
 }
 
-export function RentContractApplicationCard2({ rentContract }) {
+export function RentContractApplicationCard2({ rentContract, onRemove }) {
     const [property, setProperty] = React.useState("")
     let status
 
@@ -121,19 +143,21 @@ export function RentContractApplicationCard2({ rentContract }) {
     return (
         <div className="rent-contract-card">
             <div className="contract-info">
-                <h2 className="contract-title">{`Rent Contract No. ${rentContract.id}`}</h2>
+                <h2 className="contract-title">{`Rent Application No. ${rentContract.id}`}</h2>
                 <div className="contract-details">
                     <div className="detail-row">
+                        <button className="button-remove" onClick={onRemove}>
+                            X
+                        </button>
                         <div className="detail-label">Property NFT id:</div>
-                        <div className="detail-value">{rentContract.propertyNftId}</div>
+                        <Link className="detail-clickable" href={`/properties/${rentContract.propertyNftId}`}>
+                            {rentContract.propertyNftId}
+                        </Link>
                     </div>
-                    <div className="detail-row">
-                        <div className="detail-label">Tenant:</div>
-                        <div className="detail-value">{rentContract.tenantSbtId}</div>
-                    </div>
+
                     <div className="detail-row">
                         <div className="detail-label">Rental Term:</div>
-                        <div className="detail-value">{rentContract.rentalTerm}</div>
+                        <div className="detail-value">{rentContract.rentalTerm / 24 / 60 / 60} days</div>
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Rental Price:</div>
@@ -145,7 +169,11 @@ export function RentContractApplicationCard2({ rentContract }) {
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Start Date:</div>
-                        <div className="detail-value">{rentContract.startDate}</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.startTimestamp)}</div>
+                    </div>
+                    <div className="detail-row">
+                        <div className="detail-label">Application Valid Until:</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.validityTerm)}</div>
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Status:</div>

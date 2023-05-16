@@ -59,3 +59,7 @@ TODOs:
 
 TODO :
 When a tenant creates another rentapplication for the same property, cancel or edit the old application
+
+user can upload photos
+user can upload doc. of terms and conditions
+convert ETH to USD and EUR

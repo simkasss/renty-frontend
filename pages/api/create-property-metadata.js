@@ -8,9 +8,7 @@ require("dotenv").config()
 export default async function handler(req, res) {
     const propertyData = JSON.parse(req.body)
     console.log("propertyData", propertyData)
-
     const propertyDataHash = await uploadPropertyDataToIPFS(propertyData)
-
     res.status(201).json({ propertyDataHash })
 }
 
@@ -38,7 +36,7 @@ async function storeMetadata(metadata) {
         pinataMetadata: {
             name: metadata.name,
         },
-    }
+    } // why is this needed?
 
     try {
         const response = await pinata.pinJSONToIPFS(metadata)

@@ -12,7 +12,7 @@ import { RentContractApplicationCard2 } from "../../../components/RentContractAp
 export default function MyApplications() {
     const { wallet } = useSelector((states) => states.globalStates)
     const [rentContracts, setRentContracts] = React.useState([])
-    const [property, setProperty] = React.useState("")
+    const [removedRentContractIds, setRemovedRentContractIds] = useState([])
 
     React.useEffect(() => {
         async function getUserRentApplications() {
@@ -36,13 +36,20 @@ export default function MyApplications() {
             console.log("Rent Contract: ", rentContracts)
         })
     }, [])
+    const handleRemoveRentContract = (id) => {
+        setRemovedRentContractIds((prevIds) => [...prevIds, id])
+    }
 
     return (
         <>
             <div>
-                {rentContracts.map((rentContract) => (
-                    <RentContractApplicationCard2 key={rentContract.id} rentContract={rentContract} />
-                ))}
+                {rentContracts.map((rentContract) =>
+                    !removedRentContractIds.includes(rentContract.id) ? (
+                        <RentContractApplicationCard2 key={rentContract.id} rentContract={rentContract} />
+                    ) : (
+                        <></>
+                    )
+                )}
             </div>
         </>
     )

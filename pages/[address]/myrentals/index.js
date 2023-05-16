@@ -117,7 +117,7 @@ export default function MyRentals() {
                     ) : (
                         <p>
                             <>
-                                <Link className="button-standart" href={`/${wallet}/myrentals/rent-contract`}>
+                                <Link className="button-standart" href={`/${wallet}/myrentals/${tenant.currentRentContractId}`}>
                                     My Rent Contract
                                 </Link>
                             </>

@@ -7,6 +7,14 @@ import rentAppAbi from "../constants/RentApp.json"
 import { useSelector } from "react-redux"
 import { structureRentContracts, structureProperty } from "../utilities/structureStructs"
 
+function convertTimestampToDate(timestampInSeconds) {
+    const date = new Date(timestampInSeconds * 1000)
+    const year = date.getFullYear()
+    const month = ("0" + (date.getMonth() + 1)).slice(-2)
+    const day = ("0" + date.getDate()).slice(-2)
+    return `${year}/${month}/${day}`
+}
+
 export function RentContractCard({ rentContract }) {
     const [property, setProperty] = React.useState("")
     let status
@@ -34,11 +42,6 @@ export function RentContractCard({ rentContract }) {
         })
     }, [])
 
-    const date = new Date(rentContract.expiryTimestamp * 1000)
-    const year = date.getFullYear()
-    const month = ("0" + (date.getMonth() + 1)).slice(-2)
-    const day = ("0" + date.getDate()).slice(-2)
-    const expiryDate = `${year}/${month}/${day}`
     const nowInSeconds = Math.floor(Date.now() / 1000)
 
     if (rentContract.status == 1) {
@@ -47,7 +50,7 @@ export function RentContractCard({ rentContract }) {
         status = "Canceled"
     } else if (rentContract.status == 0) {
         status = "Waiting"
-    } else if (expiryDate < nowInSeconds) {
+    } else if (rentContract.expiryTimestamp < nowInSeconds) {
         status = "Completed"
     }
 
@@ -75,15 +78,16 @@ export function RentContractCard({ rentContract }) {
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Start Date:</div>
-                        <div className="detail-value">{rentContract.startDate}</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.startTimestamp)}</div>
+                    </div>
+
+                    <div className="detail-row">
+                        <div className="detail-label">Expiration day:</div>
+                        <div className="detail-value">{convertTimestampToDate(rentContract.expiryTimestamp)}</div>
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Status:</div>
                         <div className="detail-value status">{status}</div>
-                    </div>
-                    <div className="detail-row">
-                        <div className="detail-label">Expiration day:</div>
-                        <div className="detail-value">{expiryDate}</div>
                     </div>
                     <div className="detail-row">
                         <div className="detail-label">Hash of Terms and Conditions:</div>

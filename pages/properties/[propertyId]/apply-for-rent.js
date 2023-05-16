@@ -138,15 +138,18 @@ export default function ApplyForRent({ listedProperties }) {
 
         setRentalTerm(seconds)
 
-        await applyForRent(rentalTerm, ethers.utils.parseEther(rentalPrice), ethers.utils.parseEther(depositAmount), startDate, daysValid)
-    }
-    const handleRentalTermChange = (event) => {
-        setRentalTermSeconds(event.target.value)
+        const startDateTimestampInSeconds = Math.floor(new Date(startDate).getTime() / 1000)
+        console.log("startDateTimestampInSeconds: ", startDateTimestampInSeconds)
+
+        const daysValidInSeconds = daysValid * 24 * 60 * 60
+        console.log("daysValidInSeconds: ", daysValidInSeconds)
+        const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
+
+        const validUntil = nowTimestampInSeconds + daysValidInSeconds
+
+        await applyForRent(rentalTerm, rentalPrice, depositAmount, startDateTimestampInSeconds, validUntil)
     }
 
-    const handleNumDaysChange = (event) => {
-        setNumDays(event.target.value)
-    }
     return (
         <>
             {tenantSbtId == null ? (
@@ -170,11 +173,11 @@ export default function ApplyForRent({ listedProperties }) {
                     <form onSubmit={handleSubmit} className="form">
                         <label>
                             Start Date:
-                            <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                         </label>
                         <label>
                             Rental Term:
-                            <select value={rentalTermSeconds} onChange={handleRentalTermChange}>
+                            <select value={rentalTermSeconds} onChange={(e) => setRentalTermSeconds(e.target.value)}>
                                 <option value="year">Year</option>
                                 <option value="month">Month</option>
                                 <option value="three-months">Three Months</option>
@@ -186,20 +189,20 @@ export default function ApplyForRent({ listedProperties }) {
                         {rentalTermSeconds === "custom" && (
                             <label>
                                 Number of Days:
-                                <input type="number" value={numDays} onChange={handleNumDaysChange} />
+                                <input type="number" value={numDays} onChange={(e) => setNumDays(e.target.value)} />
                             </label>
                         )}
                         <label>
-                            Rental Price:
+                            Rental Price (WEI):
                             <input type="text" value={rentalPrice} onChange={(e) => setRentalPrice(e.target.value)} />
                         </label>
                         <label>
-                            Deposit Amount:
+                            Deposit Amount (WEI):
                             <input type="text" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
                         </label>
                         <label>
                             How many days this application is valid:
-                            <input type="text" value={daysValid} onChange={(e) => setDaysValid(e.target.value)} />
+                            <input type="number" value={daysValid} onChange={(e) => setDaysValid(e.target.value)} />
                         </label>
                         <button type="submit" className="button-standart">
                             Submit

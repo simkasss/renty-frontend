@@ -1,8 +1,4 @@
-import { ConnectButton } from "web3uikit"
 import Link from "next/link"
-import { useMoralis } from "react-moralis"
-import { useState, useEffect } from "react"
-import { ethers } from "ethers"
 import { useSelector } from "react-redux"
 import { connectWallet, truncate, monitorWalletConnection } from "../constants/blockchain"
 
@@ -27,10 +23,10 @@ export default function Header() {
                         <Link href={`/${wallet}/myrentals`} className="nav-link">
                             My Rentals
                         </Link>
-                        <Link href="/account" className="nav-link">
+                        <Link href={`/${wallet}/account`} className="nav-link">
                             Account
                         </Link>
-                        <Link href="/messages" className="nav-link">
+                        <Link href={`/${wallet}/messages`} className="nav-link">
                             Messages
                         </Link>
                     </>

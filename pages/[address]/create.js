@@ -1,15 +1,13 @@
 import Head from "next/head"
 import Link from "next/link"
-import { useState } from "react"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../constants/networkMapping.json"
 import rentAppAbi from "../../constants/RentApp.json"
 
 export default function createProperty() {
-    const [alert, setAlert] = useState(false)
-    const [propertyName, setPropertyName] = useState("")
-
+    const [alert, setAlert] = React.useState(false)
+    const [propertyName, setPropertyName] = React.useState("")
     const [propertyFormData, setPropertyFormData] = React.useState({
         area: null,
         numberOfRooms: null,
@@ -45,6 +43,7 @@ export default function createProperty() {
             return propertyId
         }
     }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         // Send form data to backend
@@ -170,6 +169,7 @@ export default function createProperty() {
                                 }
                             />
                         </label>
+
                         <button type="submit" className="button-standart">
                             Create New Property
                         </button>

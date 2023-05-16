@@ -29,11 +29,13 @@ body {
     justify-content: center;
     height: 100%;
     color: darkgrey;
+    min-height: 100%;
+    position: relative;
 }
 .footer {
     background-color: #ba953f;
     color: darkgrey;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -50,6 +52,22 @@ body {
     margin-top: 10px;
     margin-right: 0.5rem;
     margin-bottom: 0.7rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.button-remove {
+    background-color: #ba953f;
+    color: white;
+    font-weight: 500;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin-top: 0px;
+    margin-right: 0rem;
+    margin-bottom: 0.7rem;
+    position: absolute;
+    top: 0px;
+    right: 0px;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 .button-sign {
@@ -286,7 +304,9 @@ label {
     font-size: 12px;
     color: #999999;
 }
-
+.contract-info {
+    position: relative;
+}
 .rent-contract-card {
     background-color: #fff;
     border-radius: 8px;
@@ -294,11 +314,11 @@ label {
     display: flex;
     flex-direction: column;
     margin: 16px;
-    padding: 24px;
+    padding: 15px;
     max-width: 400px;
 }
 .contract-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     margin: 0 0 16px;
 }
@@ -321,6 +341,11 @@ label {
 .detail-value {
     overflow-wrap: anywhere;
 }
+.detail-clickable {
+    overflow-wrap: anywhere;
+    font-weight: bold;
+    color: #ba953f;
+}
 .status {
-    color: #2196f3;
+    color: #ba953f;
 }

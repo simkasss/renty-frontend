@@ -8,8 +8,9 @@ export const structureProperties = (properties) =>
         rentalTerm: Number(property.rentalTerm),
         rentalPrice: ethers.utils.formatEther(property.rentalPrice),
         depositAmount: ethers.utils.formatEther(property.depositAmount),
-        hashOfRentalAgreement: property.hashOfRentalAgreement,
-        hashOfMetaData: property.hashOfMetaData,
+        hashOfRentalAgreement: property.hashOfTermsAndConditions,
+        hashOfMetaData: property.hashOfPropertyMetaData,
+        hashesOfPhotos: property.hashesOfPhotos,
         rentContractsAccepted: Number(property.rentContractsAccepted),
         isRented: property.isRented,
         rentContractId: Number(property.rentContractId),
@@ -23,11 +24,26 @@ export const structureRentContracts = (contracts) =>
         rentalTerm: Number(contract.rentalTerm),
         rentalPrice: ethers.utils.formatEther(contract.rentalPrice),
         depositAmount: ethers.utils.formatEther(contract.depositAmount),
-        startDate: contract.startDate,
+        startTimestamp: Number(contract.startTimestamp),
         expiryTimestamp: Number(contract.expiryTimestamp),
-        daysOfApplicationValidity: Number(contract.daysOfApplicationValidity),
+        validityTerm: Number(contract.validityTerm),
         status: Number(contract.status),
         propertyRentContractsAccepted: Number(contract.propertyRentContractsAccepted),
+    }))
+
+export const structurePayments = (payments) =>
+    payments.map((payment) => ({
+        id: Number(payment.id),
+        name: payment.name,
+        timestamp: Number(payment.timestamp),
+        amount: Number(payment.amount),
+    }))
+export const structureDisputes = (disputes) =>
+    disputes.map((dispute) => ({
+        id: Number(dispute.id),
+        description: dispute.description,
+        solvedByLandlord: dispute.solvedByLandlord,
+        solvedByTenant: dispute.solvedByTenant,
     }))
 
 export const structureTenant = (tenant) => {
@@ -47,9 +63,9 @@ export const structureRentContract = (contract) => {
         rentalTerm: Number(contract.rentalTerm),
         rentalPrice: ethers.utils.formatEther(contract.rentalPrice),
         depositAmount: ethers.utils.formatEther(contract.depositAmount),
-        startDate: contract.startDate,
+        startTimestamp: Number(contract.startTimestamp),
         expiryTimestamp: Number(contract.expiryTimestamp),
-        daysOfApplicationValidity: Number(contract.daysOfApplicationValidity),
+        validityTerm: Number(contract.validityTerm),
         status: Number(contract.status),
         propertyRentContractsAccepted: Number(contract.propertyRentContractsAccepted),
     }
@@ -64,8 +80,9 @@ export const structureProperty = (property) => {
         rentalTerm: Number(property.rentalTerm),
         rentalPrice: ethers.utils.formatEther(property.rentalPrice),
         depositAmount: ethers.utils.formatEther(property.depositAmount),
-        hashOfRentalAgreement: property.hashOfRentalAgreement,
-        hashOfMetaData: property.hashOfMetaData,
+        hashOfRentalAgreement: property.hashOfTermsAndConditions,
+        hashOfMetaData: property.hashOfPropertyMetaData,
+        hashesOfPhotos: property.hashesOfPhotos,
         rentContractsAccepted: Number(property.rentContractsAccepted),
         isRented: property.isRented,
         rentContractId: Number(property.rentContractId),
