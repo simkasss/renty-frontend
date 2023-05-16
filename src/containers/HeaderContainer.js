@@ -1,7 +1,12 @@
 import { useSelector } from "react-redux"
-import { Header } from "../../components/Header"
+import { ConnectedHeader } from "../../components/ConnectedHeader"
+import { GuestHeader } from "../../components/GuestHeader"
+import { store } from "../../store"
+import { globalActions } from "../../store/globalSlices"
 
 const connectWallet = async () => {
+    const { setWallet } = globalActions
+
     try {
         if (!ethereum) return reportError("Please install Metamask")
         const accounts = await ethereum.request({ method: "eth_requestAccounts" })
@@ -14,5 +19,5 @@ const connectWallet = async () => {
 export function HeaderContainer() {
     const { wallet } = useSelector((states) => states.globalStates)
 
-    return <Header wallet={wallet} connectWallet={connectWallet} />
+    return wallet ? <ConnectedHeader wallet={wallet} /> : <GuestHeader connectWallet={connectWallet} />
 }
