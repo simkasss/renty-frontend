@@ -1,6 +1,4 @@
 import Link from "next/link"
-import { useSelector } from "react-redux"
-import { connectWallet, monitorWalletConnection } from "../constants/blockchain"
 
 const truncate = (text, startChars, endChars, maxLength) => {
     if (text.length > maxLength) {
@@ -14,7 +12,7 @@ const truncate = (text, startChars, endChars, maxLength) => {
     return text
 }
 
-export function Header({ wallet }) {
+export function Header({ connectWallet, wallet }) {
     return (
         <nav className="bg-violet-900">
             <div className="container mx-auto px-4 py-5 flex justify-between items-center">

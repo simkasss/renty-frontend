@@ -29,16 +29,6 @@ const getListedProperties = async () => {
     return structureProperties(listedProperties)
 }
 
-const connectWallet = async () => {
-    try {
-        if (!ethereum) return reportError("Please install Metamask")
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" })
-        store.dispatch(setWallet(accounts[0]))
-    } catch (error) {
-        reportError(error)
-    }
-}
-
 const monitorWalletConnection = async () => {
     try {
         if (!ethereum) return reportError("Install Metamask")
@@ -64,4 +54,4 @@ const monitorWalletConnection = async () => {
     }
 }
 
-export { connectWallet, monitorWalletConnection, getListedProperties }
+export { monitorWalletConnection, getListedProperties }
