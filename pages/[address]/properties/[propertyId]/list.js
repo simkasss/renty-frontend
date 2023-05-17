@@ -5,7 +5,7 @@ import { ethers } from "ethers"
 import React from "react"
 import { useRouter } from "next/router"
 import networkMapping from "../../../../constants/networkMapping.json"
-import rentAppAbi from "../../../../constants/RentApp.json"
+import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
 
 export default function listProperty() {
@@ -13,15 +13,16 @@ export default function listProperty() {
     const { propertyId: id } = router.query
     const [properties, setProperties] = React.useState([])
     const [alert, setAlert] = useState(false)
-    let provider, signer, userAddress, rentAppAddress, contractAbi, contract
+    let provider, signer, userAddress, contractAbi, contract
 
     const [description, setDescription] = React.useState("")
     const [rentalTerm, setRentalTerm] = React.useState("")
     const [rentalPrice, setRentalPrice] = React.useState("")
     const [depositAmount, setDepositAmount] = React.useState("")
+    const [hashesOfPhotos, setHashesOfPhotos] = React.useState([])
     const [hashOfRentalAggreement, setHashOfRentalAggreement] = React.useState("")
 
-    const [rentalTermSeconds, setRentalTermSeconds] = React.useState("year")
+    const [rentalTermSeconds, setRentalTermSeconds] = React.useState("")
     const [numDays, setNumDays] = React.useState("")
 
     const [selectedPhotos, setSelectedPhotos] = React.useState([])
@@ -34,9 +35,9 @@ export default function listProperty() {
                 provider = new ethers.providers.Web3Provider(ethereum)
                 signer = provider.getSigner()
                 userAddress = await signer.getAddress()
-                rentAppAddress = networkMapping["11155111"].RentApp[0]
-                contractAbi = rentAppAbi
-                contract = new ethers.Contract(rentAppAddress, contractAbi, provider)
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                contractAbi = mainContractAbi
+                contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
                 const [listedPropertiesResponse, userPropertiesResponse] = await Promise.all([
                     contract.getListedProperties(),
                     contract.getUserProperties(userAddress),
@@ -60,20 +61,20 @@ export default function listProperty() {
         })
     }, [])
 
-    async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, /*_hashOfPhotos*/ _hashOfRentalAggreement) {
+    async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, _hashesOfPhotos, _hashOfRentalAggreement) {
         provider = new ethers.providers.Web3Provider(ethereum)
         signer = provider.getSigner()
         userAddress = await signer.getAddress()
-        rentAppAddress = networkMapping["11155111"].RentApp[0]
-        contractAbi = rentAppAbi
-        contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+        const mainContractAddress = networkMapping["11155111"].MainContract[0]
+        contractAbi = mainContractAbi
+        contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
         const propertyTx = await contract.listProperty(
             _description,
             _propertyNftId,
             _rentalTerm,
             _rentalPrice,
             _depositAmount,
-            //_hashOfPhotos,
+            _hashesOfPhotos,
             _hashOfRentalAggreement
         )
         // Wait for the transaction to be confirmed
@@ -129,7 +130,7 @@ export default function listProperty() {
 
         //until here
         // update hashofrentalagreement and add hashofphotos
-        await listProperty(description, property.propertyNftId, rentalTerm, rentalPrice, depositAmount, hashOfRentalAggreement)
+        await listProperty(description, property.propertyNftId, rentalTerm, rentalPrice, depositAmount, hashesOfPhotos, hashOfRentalAggreement)
     }
 
     const handleRentalTermChange = (event) => {
@@ -175,7 +176,6 @@ export default function listProperty() {
                                     <option value="month">Month</option>
                                     <option value="three-months">Three Months</option>
                                     <option value="six-months">Six Months</option>
-
                                     <option value="custom">Select Number of Days</option>
                                 </select>
                             </label>

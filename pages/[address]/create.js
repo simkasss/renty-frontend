@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../constants/networkMapping.json"
-import rentAppAbi from "../../constants/RentApp.json"
+import mainContractAbi from "../../constants/MainContract.json"
 
 export default function createProperty() {
     const [alert, setAlert] = React.useState(false)
@@ -26,9 +26,9 @@ export default function createProperty() {
             const provider = new ethers.providers.Web3Provider(ethereum)
             const signer = provider.getSigner()
             const userAddress = await signer.getAddress()
-            const rentAppAddress = networkMapping["11155111"].RentApp[0]
-            const contractAbi = rentAppAbi
-            const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
 
             const propertyTx = await contract.createProperty(_nftTokenURI, _propertyName, _hashOfMetaData)
             // Wait for the transaction to be confirmed

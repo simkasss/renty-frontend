@@ -84,14 +84,7 @@ export function PropertyDetails({ property, onBack }) {
                 <p className="standartbolded">Description:</p>
                 <p>{property.description}</p>
             </div>
-            <div className="review-section w-1/3">
-                <div className="standartbolded">Reviews:</div>
-                <div className="review-card">
-                    <div className="standartbolded">John Doe</div>
-                    <p>Some review of past tenant.</p>
-                    <div className="date">May 1, 2023</div>
-                </div>
-            </div>
+
             <button className="back-button" onClick={onBack}>
                 Back
             </button>

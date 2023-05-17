@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
 import networkMapping from "../../../constants/networkMapping.json"
-import rentAppAbi from "../../../constants/RentApp.json"
+import mainContractAbi from "../../../constants/MainContract.json"
 import { structureProperties } from "../../../utilities/structureStructs"
 import { useSelector } from "react-redux"
 
@@ -19,9 +19,9 @@ export default function Property() {
                 const provider = new ethers.providers.Web3Provider(ethereum)
                 const signer = provider.getSigner()
                 const userAddress = await signer.getAddress()
-                const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                const contractAbi = rentAppAbi
-                const contract = new ethers.Contract(rentAppAddress, contractAbi, provider)
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
 
                 const [listedPropertiesResponse, userPropertiesResponse] = await Promise.all([
                     contract.getListedProperties(),

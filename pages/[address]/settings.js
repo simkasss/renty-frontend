@@ -1,12 +1,12 @@
 import Head from "next/head"
 
-export default function Messages() {
+export default function Settings() {
     return (
         <div>
             <Head>
-                <title>Messages</title>
+                <title>Settings</title>
             </Head>
-            Messages
+            Settings
         </div>
     )
 }

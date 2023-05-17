@@ -1,12 +1,10 @@
-import propertyNftAbi from "./PropertyNft.json"
-import tenantSoulboundTokenAbi from "./TenantSoulboundToken.json"
-import rentAppAbi from "./RentApp.json"
+import mainContractAbi from "./MainContract.json"
 import networkMapping from "./networkMapping.json"
-export const rentAppAddress = networkMapping["11155111"].RentApp[0]
 import { store } from "../store"
 import { ethers } from "ethers"
 import { globalActions } from "../store/globalSlices"
 import { structureProperties } from "../utilities/structureStructs"
+export const mainContractAddress = networkMapping["11155111"].MainContract[0]
 
 const { setWallet } = globalActions
 let tx, ethereum
@@ -19,7 +17,7 @@ const serversideEthereumContract = async () => {
     const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_APP_RPC_URL)
     const wallet = ethers.Wallet.createRandom()
     const signer = provider.getSigner(wallet.address)
-    const contract = new ethers.Contract(rentAppAddress, rentAppAbi, signer)
+    const contract = new ethers.Contract(mainContractAddress, mainContractAbi, signer)
     return contract
 }
 
