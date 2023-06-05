@@ -3,173 +3,375 @@ import Link from "next/link"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../../../constants/networkMapping.json"
-import rentAppAbi from "../../../../constants/RentApp.json"
+import mainContractAbi from "../../../../constants/MainContract.json"
+import transfersAndDisputesAbi from "../../../../constants/TransfersAndDisputes.json"
 import { useSelector } from "react-redux"
-import { structureTenant, structureRentContract } from "../../../../utilities/structureStructs"
+import { structureProperty, structureRentContract, structurePayments, structureDisputes } from "../../../../utilities/structureStructs"
 
 import { useRouter } from "next/router"
+import { RentContractCardTenant } from "../../../../components/RentContractCardTenant"
 
-async function getContract() {
-    if (typeof window !== "undefined") {
-        ethereum = window.ethereum
-        const provider = new ethers.providers.Web3Provider(ethereum)
-        const rentAppAddress = networkMapping["11155111"].RentApp[0]
-        const contractAbi = rentAppAbi
-        const contract = new ethers.Contract(rentAppAddress, contractAbi, provider)
-        return contract
-    }
+async function getProperty(rentContract) {
+    ethereum = window.ethereum
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const signer = provider.getSigner()
+    const mainContractAddress = networkMapping["11155111"].MainContract[0]
+    const contractAbi = mainContractAbi
+    const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+    const property = structureProperty(await contract.getProperty(rentContract.propertyNftId))
+    return property
+}
+
+async function getDisputes({ rentContract, transfersAndDisputesContract }) {
+    const disputes = await transfersAndDisputesContract.getRentContractDisputes(rentContract.id)
+    console.log("disputes", disputes)
+    const structuredDisputes = structureDisputes(disputes)
+    return structuredDisputes
+}
+
+async function getDeposit({ rentContract, transfersAndDisputesContract }) {
+    console.log("rentContract.id", rentContract.id)
+    console.log("rentContract", rentContract)
+    const transferedDepositAmount = await transfersAndDisputesContract.getDeposit(rentContract.id)
+    console.log("Transfered Deposit Amount: ", ethers.utils.formatEther(transferedDepositAmount))
+    return ethers.utils.formatEther(transferedDepositAmount)
+}
+
+async function getPaidRent({ rentContract, transfersAndDisputesContract }) {
+    const totalPaid = await transfersAndDisputesContract.getAmountOfPaidRent(rentContract.id)
+    console.log("Total Paid Rent: ", ethers.utils.formatEther(totalPaid))
+    return ethers.utils.formatEther(totalPaid)
+}
+
+async function getDepositReleasePermission({ rentContract, transfersAndDisputesContract }) {
+    const bool = await transfersAndDisputesContract.depositReleasePermission(rentContract.id)
+    return bool
 }
 
 export default function RentContract() {
+    const [rentContract, setRentContract] = React.useState(null)
     const router = useRouter()
-    const [rentContract, setRentContract] = React.useState("")
-    const { wallet } = useSelector((states) => states.globalStates)
     const { rentContractId } = router.query
+    const [property, setProperty] = React.useState("")
+    const [payments, setPayments] = React.useState([])
+    const [disputes, setDisputes] = React.useState([])
+    const [conversionChecked, setConversionChecked] = React.useState(true)
+    const [showPaymentHistory, setShowPaymentHistory] = React.useState(false)
+    const [showDisputes, setShowDisputes] = React.useState(false)
+    const [disputeDescription, setDisputeDescription] = React.useState("")
+    const [alert, setAlert] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
+    const [solvedLoading, setSolvedLoading] = React.useState(false)
+    const [solvedAlert, setSolvedAlert] = React.useState(false)
+    const [transferDepositLoading, setTransferDepositLoading] = React.useState(false)
+    const [transferDepositdAlert, setTransferDepositAlert] = React.useState(false)
     const [depositTransfered, setDepositTransfered] = React.useState(0)
     const [totalRentPaid, setTotalRentPaid] = React.useState(0)
     const [totalRequiredRentAmount, setTotalRequiredRentAmount] = React.useState(0)
+    const [payLoading, setPayLoading] = React.useState(false)
+    const [payAlert, setPayAlert] = React.useState(false)
+    const [terminateLoading, setTerminateLoading] = React.useState(false)
+    const [terminateAlert, setTerminateAlert] = React.useState(false)
+    const [email, setEmail] = React.useState("")
+    const [phoneNumber, setPhoneNumber] = React.useState("")
+    const [showContactDetails, setShowContactDetails] = React.useState(false)
+    const [depositReleasePermission, setDepositReleasePermission] = React.useState(false)
+    const [rentalPriceInUsd, setRentalPriceInUsd] = React.useState("")
+    const [depositInUsd, setDepositInUsd] = React.useState("")
+    const [transferedDepositInUsd, setTransferedDepositInUsd] = React.useState("")
+    const [totalRentPaidInUsd, setTotalRentPaidInUsd] = React.useState("")
+    const [totalRequiredInUsd, setTotalRequiredInUsd] = React.useState("")
+
+    async function getMainContract() {
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const mainContractAddress = networkMapping["11155111"].MainContract[0]
+        const contractAbi = mainContractAbi
+        const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+        return contract
+    }
+
+    async function getTransfersAndDisputesContract() {
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+        const contractAbi = transfersAndDisputesAbi
+        const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+        return contract
+    }
 
     React.useEffect(() => {
+        if (typeof window === "undefined" || rentContractId === undefined) {
+            return
+        }
+
         async function getRentContract(contract) {
             const rentContract = structureRentContract(await contract.getRentContract(rentContractId))
-            console.log("Rent Contract: ", rentContract)
-            setRentContract(rentContract)
+            return rentContract
         }
 
-        async function getDeposit(contract) {
-            //need to deploy new contract for this to work
-            //const transferedDepositAmount = await contract.getDeposit(rentContract.propertyNftId)
-            // console.log("Transfered Deposit Amount: ", transferedDepositAmount)
-            // setDepositTransfered(transferedDepositAmount)
-        }
-        async function getPaidRent(contract) {
-            //need to deploy new contract for this to work
-            //    const totalPaid = await contract.getAmountOfPaidRent(rentContract.id)
-            //    setTotalRentPaid(totalPaid)
-        }
-        async function getRequiredPaidAmount() {
-            const requiredPaidAmount = rentContract
+        async function getMainContract() {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            return contract
         }
 
-        getContract().then((contract) => {
-            getRentContract(contract)
-            getDeposit(contract)
-            getPaidRent(contract)
+        async function getTransfersAndDisputesContract() {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+            const contractAbi = transfersAndDisputesAbi
+            const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+            return contract
+        }
+
+        async function getRequiredPaidAmount(rentContract) {
+            const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
+
+            const requiredPaidAmount = (
+                ((nowTimestampInSeconds - rentContract.startTimestamp) / 60 / 60 / 24 / 30) *
+                rentContract.rentalPrice
+            ).toFixed(5)
+
+            return Number(requiredPaidAmount)
+        }
+
+        async function getPropertyOwner(rentContract) {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            const owner = await contract.getPropertyOwner(rentContract.propertyNftId)
+            console.log("owner", owner)
+            return owner
+        }
+        async function getEmail(owner) {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            const email = await contract.getUserEmail(owner)
+            console.log(`Email: `, email)
+            setEmail(email)
+        }
+        async function getPhoneNumber(owner) {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            const number = await contract.getUserPhoneNumber(owner)
+            console.log(`Phone Number: `, number)
+            setPhoneNumber(number)
+        }
+
+        getMainContract().then((mainContract) => {
+            getRentContract(mainContract)
+                .then((rentContract) => {
+                    console.log("Rent Contract: ", rentContract)
+                    setRentContract(rentContract)
+                    getProperty(rentContract).then((property) => {
+                        setProperty(property)
+                    })
+                    getPropertyOwner(rentContract).then((owner) => {
+                        getEmail(owner)
+                        getPhoneNumber(owner)
+                    })
+                    getTransfersAndDisputesContract()
+                        .then((transfersAndDisputesContract) => {
+                            getDisputes({ rentContract, transfersAndDisputesContract }).then((disputes) => setDisputes(disputes))
+                            console.log(disputes, "disputes")
+                            getDeposit({ rentContract, transfersAndDisputesContract }).then((deposit) => setDepositTransfered(deposit))
+                            getPaidRent({ rentContract, transfersAndDisputesContract }).then((paidRent) => setTotalRentPaid(paidRent))
+                            getDepositReleasePermission({ rentContract, transfersAndDisputesContract }).then((bool) => {
+                                console.log(bool)
+                                setDepositReleasePermission(bool)
+                            })
+                            getRequiredPaidAmount(rentContract).then((requiredPaidAmount) => setTotalRequiredRentAmount(requiredPaidAmount))
+                        })
+                        .catch((e) => {
+                            console.log(e)
+                        })
+                })
+                .catch((e) => console.log(e))
         })
-    }, [])
+    }, [rentContractId])
 
+    const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
+
+    async function getPaymentHistory() {
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+        const contractAbi = transfersAndDisputesAbi
+        const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, provider)
+
+        const payments = structurePayments(await contract.getRentContractPaymentHistory(rentContract.id))
+        console.log(payments)
+        setPayments(payments)
+
+        return payments
+    }
+    function handleShowDisputes() {
+        setShowDisputes(!showDisputes)
+    }
+    async function handleCreateDisputeSubmit() {
+        setLoading(true)
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+        const contractAbi = transfersAndDisputesAbi
+        const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+        const createDispute = await contract.createDispute(rentContract.id, disputeDescription)
+        await createDispute.wait()
+        setAlert(true)
+        console.log("dispute", disputeDescription)
+    }
+    async function solveDispute(disputeId) {
+        setSolvedLoading(true)
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+        const contractAbi = transfersAndDisputesAbi
+        const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+        const solveDispute = await contract.solveDispute(rentContract.id, disputeId)
+        await solveDispute.wait()
+        console.log("solved")
+        setSolvedAlert(true)
+    }
     async function transferDeposit() {
-        const contract = await getContract()
+        setTransferDepositLoading(true)
+        const contract = await getTransfersAndDisputesContract()
+
         const transaction = await contract.transferSecurityDeposit(rentContract.propertyNftId, rentContract.id, {
             value: ethers.utils.parseEther(rentContract.depositAmount),
         })
         await transaction.wait()
-        console.log("Transaction complete:", transaction.hash)
+
+        console.log("Deposit transfered!")
+        setTransferDepositAlert(true)
     }
+
     async function payRent() {
-        const contract = await getContract()
+        setPayLoading(true)
+        const contract = await getTransfersAndDisputesContract()
         const transaction = await contract.transferRent(rentContract.propertyNftId, rentContract.id, {
             value: ethers.utils.parseEther(rentContract.rentalPrice),
         })
         await transaction.wait()
-        console.log("Transaction complete:", transaction.hash)
-    }
-
-    function convertTimestampToDate(timestampInSeconds) {
-        const date = new Date(timestampInSeconds * 1000)
-        const year = date.getFullYear()
-        const month = ("0" + (date.getMonth() + 1)).slice(-2)
-        const day = ("0" + date.getDate()).slice(-2)
-        return `${year}/${month}/${day}`
-    }
-    const nowInSeconds = Math.floor(Date.now() / 1000)
-
-    async function handleTransferDepositClick() {
-        await transferDeposit()
-        console.log("Deposit transfered!")
-    }
-
-    async function handlePayRentClick() {
-        await payRent()
         console.log("Rent Paid!")
+        setPayAlert(true)
+    }
+
+    async function handleTerminate() {
+        setTerminateLoading(true)
+        const contract = await getMainContract()
+        const disputesContract = await getTransfersAndDisputesContract()
+        await contract.terminateRentContract(rentContract.propertyNftId, rentContract.id)
+        const createDispute = await disputesContract.createDispute(rentContract.id, "Contract was terminated before expiry date")
+        await createDispute.wait()
+        setTerminateAlert(true)
+    }
+
+    async function releaseDeposit() {
+        const contract = await getTransfersAndDisputesContract()
+        await contract.releaseDeposit(rentContract.id)
+    }
+
+    async function getWEIAmountInUSD(ethAmount) {
+        if (typeof window !== "undefined") {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
+            const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
+            console.log("amountInWei: ", Number(amountInWei))
+            const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
+            console.log("amount in usd: ", Number(amountInUsd))
+
+            return amountInUsd
+        }
+    }
+
+    function handlePaymentHistoryClick() {
+        setShowPaymentHistory(!showPaymentHistory)
+        getPaymentHistory()
+    }
+
+    const handleChange = () => {
+        setConversionChecked(!conversionChecked)
+        getWEIAmountInUSD(rentContract.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
+        getWEIAmountInUSD(rentContract.depositAmount).then((usd) => setDepositInUsd(usd))
+        getWEIAmountInUSD(depositTransfered.toString()).then((usd) => setTransferedDepositInUsd(usd))
+        getWEIAmountInUSD(totalRentPaid.toString()).then((usd) => setTotalRentPaidInUsd(usd))
+        if (totalRequiredRentAmount > 0) {
+            getWEIAmountInUSD(totalRequiredRentAmount.toString()).then((usd) => setTotalRequiredInUsd(usd))
+        }
     }
 
     return (
-        <>
-            <div>
-                <div className="contract-info">
-                    <h2 className="contract-title">{`Rent Contract No. ${rentContract.id}`}</h2>
-                    <div className="contract-details">
-                        <div className="detail-row">
-                            <div className="detail-label">Property NFT id:</div>
-                            <div className="detail-value">{rentContract.propertyNftId}</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Rental Term:</div>
-                            <div className="detail-value">{rentContract.rentalTerm / 60 / 60 / 24} days</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Rental Price:</div>
-                            <div className="detail-value">{rentContract.rentalPrice} ETH</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Deposit Amount:</div>
-                            <div className="detail-value">{rentContract.depositAmount} ETH</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Start Date:</div>
-                            <div className="detail-value">{convertTimestampToDate(rentContract.startTimestamp)}</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Expiration day:</div>
-                            <div className="detail-value">{convertTimestampToDate(rentContract.expiryTimestamp)}</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Hash of Terms and Conditions:</div>
-                            <div className="detail-value">{/* ADD HASH HERE */}</div>
-                        </div>
-                        <div className="detail-row">
-                            <div className="detail-label">Have disputes:</div>
-                            <div className="detail-value"> HOW SHOULD WE MANAGE DISPUTES? </div>
-                        </div>
-                        {depositTransfered >= rentContract.depositAmount ? (
-                            <>
-                                <div className="detail-row">
-                                    <div className="detail-label">Deposit is transfered</div>
-                                </div>
-                                <div className="detail-row">
-                                    <div className="detail-label">Total rent paid:</div>
-                                    <div className="detail-value"> {totalRentPaid} - Here should be amount already paid </div>
-                                </div>
-                                <div className="detail-row">
-                                    <div className="detail-label">Total required amount of paid rent:</div>
-                                    <div className="detail-value"> {totalRequiredRentAmount} - Here should be amount needed to be paid </div>
-                                </div>
-                                {totalRentPaid < totalRequiredRentAmount ? (
-                                    <div className="detail-row">
-                                        <div className="detail-label"> You need to pay rent! </div>
-                                    </div>
-                                ) : (
-                                    <></>
-                                )}
-                            </>
-                        ) : (
-                            <button className="button-standart" onClick={handleTransferDepositClick}>
-                                Transfer Deposit
-                            </button>
-                        )}
-
-                        <button className="button-standart" onClick={handlePayRentClick}>
-                            Pay Rent
-                        </button>
-                        <button className="button-standart">Contact Landlord</button>
-                        <Link className="button-standart" href={`/${wallet}/myrentals/${rentContractId}/payment-history`}>
-                            Payment History{" "}
-                        </Link>
-                        <button className="button-standart">Create Dispute</button>
-                    </div>
-                </div>
-            </div>
-        </>
+        rentContract && (
+            <RentContractCardTenant
+                {...{
+                    rentContract,
+                    property,
+                    handlePaymentHistoryClick,
+                    payments,
+                    showPaymentHistory,
+                    showDisputes,
+                    handleShowDisputes,
+                    disputeDescription,
+                    setDisputeDescription,
+                    alert,
+                    loading,
+                    handleCreateDisputeSubmit,
+                    disputes,
+                    solveDispute,
+                    solvedLoading,
+                    solvedAlert,
+                    depositTransfered,
+                    totalRentPaid,
+                    totalRequiredRentAmount,
+                    transferDeposit,
+                    payRent,
+                    transferDepositLoading,
+                    transferDepositdAlert,
+                    payLoading,
+                    payAlert,
+                    handleTerminate,
+                    terminateLoading,
+                    terminateAlert,
+                    email,
+                    phoneNumber,
+                    setShowContactDetails,
+                    showContactDetails,
+                    depositReleasePermission,
+                    releaseDeposit,
+                    nowTimestampInSeconds,
+                    handleChange,
+                    conversionChecked,
+                    rentalPriceInUsd,
+                    depositInUsd,
+                    transferedDepositInUsd,
+                    totalRentPaidInUsd,
+                    totalRequiredInUsd,
+                }}
+            />
+        )
     )
 }

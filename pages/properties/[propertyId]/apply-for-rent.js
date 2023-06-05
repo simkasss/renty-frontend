@@ -6,33 +6,40 @@ import Link from "next/link"
 import React from "react"
 import { ethers } from "ethers"
 import networkMapping from "../../../constants/networkMapping.json"
-import rentAppAbi from "../../../constants/RentApp.json"
+import mainContractAbi from "../../../constants/MainContract.json"
+import tenantManagerAbi from "../../../constants/TenantManager.json"
 import { useSelector } from "react-redux"
-import { structureTenant } from "../../../utilities/structureStructs"
+import { ApplyForm } from "../../../components/ApplyForm"
 
 export default function ApplyForRent({ listedProperties }) {
     const [alert, setAlert] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
     const router = useRouter()
-    const { propertyId: id } = router.query
-    const [tenantSbtId, setTenantSbtId] = React.useState("")
-    const [tenant, setTenant] = React.useState("")
     const { wallet } = useSelector((states) => states.globalStates)
+    const { propertyId: id } = router.query
+    const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
+
+    const [tenantId, setTenantId] = React.useState("")
+    const [tenantName, setTenantName] = React.useState("")
     const [rentalTermSeconds, setRentalTermSeconds] = React.useState("year")
-    const [numDays, setNumDays] = React.useState("")
+    const [numDays, setNumDays] = React.useState(null)
+    const [applyFormData, setApplyFormData] = React.useState({
+        startDate: "",
+        daysValid: "",
+        rentalPrice: "",
+        depositAmount: "",
+    })
 
     React.useEffect(() => {
-        let provider, signer, userAddress, rentAppAddress, contractAbi, contract
-
         async function getContract() {
             if (typeof window !== "undefined") {
                 try {
                     ethereum = window.ethereum
-                    provider = new ethers.providers.Web3Provider(ethereum)
-                    signer = provider.getSigner()
-                    userAddress = await signer.getAddress()
-                    rentAppAddress = networkMapping["11155111"].RentApp[0]
-                    contractAbi = rentAppAbi
-                    contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+                    const provider = new ethers.providers.Web3Provider(ethereum)
+                    const signer = provider.getSigner()
+                    const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
+                    const contractAbi = tenantManagerAbi
+                    const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
                     return contract
                 } catch (e) {
                     console.log(e)
@@ -40,49 +47,44 @@ export default function ApplyForRent({ listedProperties }) {
             }
         }
 
-        async function getSbtTokenId() {
+        async function getTokenId(contract) {
             try {
-                const sbtTokenId = await contract.getSbtTokenId(userAddress)
-                console.log(`User has soulbound token. Token ID: ${sbtTokenId}`)
-                return sbtTokenId
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const userAddress = provider.getSigner().getAddress()
+                const tokenId = await contract.getTokenId(userAddress)
+                console.log(`User has soulbound token. Token ID: ${tokenId}`)
+                return tokenId
             } catch (e) {
                 console.log(e)
             }
         }
-        async function getTenant(tenantSbtId) {
+        async function getTenantName(contract) {
             try {
-                const tenant = structureTenant(await contract.getTenant(tenantSbtId))
-                console.log(`Tenant: ${tenant}`)
-                return tenant
+                const name = await contract.getTokenOwnerName(tenantId)
+                console.log(`Name: ${name}`)
+                return name
             } catch (e) {
                 console.log(e)
             }
         }
 
-        getContract().then(() => {
-            getSbtTokenId().then((tokenId) => {
-                setTenantSbtId(tokenId)
-                getTenant(tokenId).then((tenant) => {
-                    setTenant(tenant)
-                    console.log("Tenant: ", tenant)
+        getContract().then((contract) => {
+            getTokenId(contract)
+                .then((tokenId) => {
+                    setTenantId(tokenId)
                 })
-            })
+                .then(() => getTenantName(contract).then((name) => setTenantName(name)))
         })
-    }, [])
-
-    // Find the selected property from the properties array using the id parameter.
-    const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
-
-    // If the selected property is not found, show a message.
-    if (!selectedProperty) {
-        return <div>Property not found</div>
-    }
-
-    const [startDate, setStartDate] = React.useState("")
-    const [rentalTerm, setRentalTerm] = React.useState("")
-    const [daysValid, setDaysValid] = React.useState("")
-    const [rentalPrice, setRentalPrice] = React.useState(selectedProperty.rentalPrice)
-    const [depositAmount, setDepositAmount] = React.useState(selectedProperty.depositAmount)
+        console.log(selectedProperty)
+        setApplyFormData((prevData) => ({
+            ...prevData,
+            depositAmount: selectedProperty.depositAmount,
+        }))
+        setApplyFormData((prevData) => ({
+            ...prevData,
+            rentalPrice: selectedProperty.rentalPrice,
+        }))
+    }, [tenantName])
 
     async function applyForRent(_rentalTerm, _rentalPrice, _depositAmount, _startDate, _daysValid) {
         try {
@@ -90,16 +92,16 @@ export default function ApplyForRent({ listedProperties }) {
                 ethereum = window.ethereum
                 const provider = new ethers.providers.Web3Provider(ethereum)
                 const signer = provider.getSigner()
-                const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                const contractAbi = rentAppAbi
-                const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
 
                 const propertyTx = await contract.createRentContract(
                     selectedProperty.propertyNftId,
-                    tenantSbtId,
+                    tenantId,
                     _rentalTerm,
-                    _rentalPrice,
-                    _depositAmount,
+                    ethers.BigNumber.from(ethers.utils.parseUnits(_rentalPrice, 18)),
+                    ethers.BigNumber.from(ethers.utils.parseUnits(_depositAmount, 18)),
                     _startDate,
                     _daysValid
                 )
@@ -119,99 +121,57 @@ export default function ApplyForRent({ listedProperties }) {
             console.log(e)
         }
     }
+    const handleRentalTermChange = (event) => {
+        setRentalTermSeconds(event.target.value)
+    }
 
     const handleSubmit = async (e) => {
+        setLoading(true)
         e.preventDefault()
 
-        let seconds = 0
+        let rentalTerm = 0
         if (rentalTermSeconds === "month") {
-            seconds = 30 * 24 * 60 * 60
+            rentalTerm = 30 * 24 * 60 * 60
         } else if (rentalTermSeconds === "three-months") {
-            seconds = 3 * 30 * 24 * 60 * 60
+            rentalTerm = 3 * 30 * 24 * 60 * 60
         } else if (rentalTermSeconds === "six-months") {
-            seconds = 6 * 30 * 24 * 60 * 60
+            rentalTerm = 6 * 30 * 24 * 60 * 60
         } else if (rentalTermSeconds === "year") {
-            seconds = 12 * 30 * 24 * 60 * 60
+            rentalTerm = 12 * 30 * 24 * 60 * 60
         } else if (rentalTermSeconds === "custom") {
-            seconds = numDays * 24 * 60 * 60
+            rentalTerm = numDays * 24 * 60 * 60
         }
+        console.log(rentalTerm)
 
-        setRentalTerm(seconds)
+        const startDateTimestampInSeconds = Math.floor(new Date(applyFormData.startDate).getTime() / 1000)
 
-        const startDateTimestampInSeconds = Math.floor(new Date(startDate).getTime() / 1000)
-        console.log("startDateTimestampInSeconds: ", startDateTimestampInSeconds)
+        const daysValidInSeconds = applyFormData.daysValid * 24 * 60 * 60
 
-        const daysValidInSeconds = daysValid * 24 * 60 * 60
-        console.log("daysValidInSeconds: ", daysValidInSeconds)
         const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
 
         const validUntil = nowTimestampInSeconds + daysValidInSeconds
+        console.log("txData: ", rentalTerm, applyFormData.rentalPrice, applyFormData.depositAmount, startDateTimestampInSeconds, validUntil)
 
-        await applyForRent(rentalTerm, rentalPrice, depositAmount, startDateTimestampInSeconds, validUntil)
+        await applyForRent(rentalTerm, applyFormData.rentalPrice, applyFormData.depositAmount, startDateTimestampInSeconds, validUntil)
     }
 
     return (
-        <>
-            {tenantSbtId == null ? (
-                <>
-                    {wallet == 0 ? (
-                        <>You have to Log In and create a soulbound token in order to apply for rent</>
-                    ) : (
-                        <>
-                            <div>You have to create your soulbound token in order to apply for rent </div>
-                            <Link className="link-standart" href={`/${wallet}/myrentals`}>
-                                Redirect
-                            </Link>
-                        </>
-                    )}
-                </>
-            ) : (
-                <>
-                    <>My Tenant Soulbound Token ID: {Number(tenantSbtId)}</>
-                    <div>My name: {tenant.name}</div>
-
-                    <form onSubmit={handleSubmit} className="form">
-                        <label>
-                            Start Date:
-                            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                        </label>
-                        <label>
-                            Rental Term:
-                            <select value={rentalTermSeconds} onChange={(e) => setRentalTermSeconds(e.target.value)}>
-                                <option value="year">Year</option>
-                                <option value="month">Month</option>
-                                <option value="three-months">Three Months</option>
-                                <option value="six-months">Six Months</option>
-
-                                <option value="custom">Select Number of Days</option>
-                            </select>
-                        </label>
-                        {rentalTermSeconds === "custom" && (
-                            <label>
-                                Number of Days:
-                                <input type="number" value={numDays} onChange={(e) => setNumDays(e.target.value)} />
-                            </label>
-                        )}
-                        <label>
-                            Rental Price (WEI):
-                            <input type="text" value={rentalPrice} onChange={(e) => setRentalPrice(e.target.value)} />
-                        </label>
-                        <label>
-                            Deposit Amount (WEI):
-                            <input type="text" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
-                        </label>
-                        <label>
-                            How many days this application is valid:
-                            <input type="number" value={daysValid} onChange={(e) => setDaysValid(e.target.value)} />
-                        </label>
-                        <button type="submit" className="button-standart">
-                            Submit
-                        </button>
-                    </form>
-                    {alert ? <div> Application submited! </div> : <></>}
-                </>
-            )}
-        </>
+        <ApplyForm
+            {...{
+                applyFormData,
+                setApplyFormData,
+                handleSubmit,
+                tenantId,
+                wallet,
+                tenantName,
+                alert,
+                loading,
+                rentalTermSeconds,
+                handleRentalTermChange,
+                numDays,
+                setNumDays,
+            }}
+        />
     )
 }
 

@@ -1,93 +1,71 @@
 import React from "react"
-import Link from "next/link"
-import { useRouter } from "next/router"
-export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
-    return (
-        <Link href={`/properties/${id}`}>
-            <div
-                className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-                role="button"
-                tabIndex={0}
-                onClick={onClick}
-            >
-                <div>
-                    <div className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{name}</div>
-                    <span className="font-normal text-gray-700 dark:text-gray-400">Rental Price:</span>{" "}
-                    <span className="text-gray-200 text-xs font-extrabold tracking-tight">{rentalPrice} ETH</span>
-                    <div className="font-normal text-gray-700 dark:text-gray-400">Rental Term: {rentalTerm / 60 / 60 / 24} days</div>
-                </div>
-            </div>
-        </Link>
-    )
-}
+import Card from "@mui/material/Card"
+import CardActions from "@mui/material/CardActions"
+import CardContent from "@mui/material/CardContent"
+import CardMedia from "@mui/material/CardMedia"
+import Button from "@mui/material/Button"
+import Typography from "@mui/material/Typography"
+import { ethers } from "ethers"
+import networkMapping from "../constants/networkMapping.json"
+import mainContractAbi from "../constants/MainContract.json"
 
-export function PropertyDetails({ property, onBack }) {
-    const [numberOfRooms, setNumberOfRooms] = React.useState("")
-    const [area, setArea] = React.useState("")
-    const [floor, setFloor] = React.useState("")
-    const [buildYear, setBuildYear] = React.useState("")
+export function PropertyCard({ name, rentalPrice, rentalTerm, hashesOfPhotos, hashOfMetaData, onClick, conversionChecked }) {
+    const [address, setAddress] = React.useState("")
+    const [rentalPriceInUsd, setRentalPriceInUsd] = React.useState("")
+    React.useEffect(() => {
+        async function getPropertyData() {
+            const url = `https://gateway.pinata.cloud/ipfs/${hashOfMetaData}`
+            await fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
 
-    async function getPropertyData() {
-        const url = `https://gateway.pinata.cloud/ipfs/${property.hashOfMetaData}`
-        await fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data)
-                setNumberOfRooms(data.numberOfRooms)
-                setArea(data.area)
-                setFloor(data.floor)
-                setBuildYear(data.buildYear)
-            })
-            .catch((error) => console.error(error))
-    }
-    getPropertyData()
-    const router = useRouter()
+                    setAddress(data.address)
+                })
+                .catch((error) => console.error(error))
+        }
+        async function getWEIAmountInUSD(ethAmount) {
+            if (typeof window !== "undefined") {
+                ethereum = window.ethereum
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
+                const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
+                console.log("amountInWei: ", Number(amountInWei))
+                const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
+                console.log("amount in usd: ", Number(amountInUsd))
+                setRentalPriceInUsd(amountInUsd)
 
-    const handleApplyClick = () => {
-        router.push(`/properties/${property.propertyNftId}/apply-for-rent`)
-    }
+                return amountInUsd
+            }
+        }
+        getPropertyData()
+        getWEIAmountInUSD(rentalPrice)
+    }, [])
 
     return (
-        <div className="container mx-auto px-4 py-5">
-            <div className="flex">
-                <div className="w-1/2">{/* Place your photo component here */}</div>
-                <div className="w-1/2">
-                    <div className="flex items-start justify-end mb-4">
-                        <button className=" bg-violet-900 hover:bg-violet-800 text-white font-bold py-2 px-4 rounded" onClick={handleApplyClick}>
-                            Apply for Rent
-                        </button>
-                    </div>
-                    <div className="property-info">
-                        <h2>{property.name}</h2>
-                        <p className="standartbolded">Rental Price</p>
-                        <p>${property.rentalPrice} ETH/month</p>
-                        <p className="standartbolded">Deposit:</p>
-                        <p>{property.depositAmount} ETH</p>
-                        <p className="standartbolded">Rental Term:</p>
-                        <p>{property.rentalTerm / 60 / 60 / 24} days</p>
-                        <p className="standartbolded">Number of rooms:</p>
-                        <p>{numberOfRooms}</p>
-                        <p className="standartbolded">Area:</p>
-                        <p>{area}</p>
-                        <p className="standartbolded">Floor:</p>
-                        <p>{floor}</p>
-                        <p className="standartbolded">Build Year:</p>
-                        <p>{buildYear}</p>
-                        <p className="standartbolded">Property NFT id:</p>
-                        <p>{property.propertyNftId}</p>
-                        <p className="standartbolded">Hash of Terms and Conditions:</p>
-                        <p>{property.hashOfRentalAgreement}</p>
-                    </div>
-                </div>
-            </div>
-            <div className="description-section">
-                <p className="standartbolded">Description:</p>
-                <p>{property.description}</p>
-            </div>
-
-            <button className="back-button" onClick={onBack}>
-                Back
-            </button>
-        </div>
+        <>
+            <Card sx={{ maxWidth: 345 }} onClick={onClick}>
+                <CardMedia sx={{ height: 200 }} image={`https://gateway.pinata.cloud/ipfs/${hashesOfPhotos[0]}`} title="flat" />
+                <CardContent>
+                    <Typography gutterBottom variant="h6" component="div">
+                        {name}
+                    </Typography>
+                    <Typography variant="body1" component="div" color="primary">
+                        {conversionChecked ? `${rentalPrice} ETH/month` : `${rentalPriceInUsd} USD/month`}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {address}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Rental Term: {rentalTerm / 60 / 60 / 24} days
+                    </Typography>
+                </CardContent>
+                <CardActions>
+                    <Button size="small">More details</Button>
+                </CardActions>
+            </Card>
+        </>
     )
 }

@@ -6,22 +6,26 @@ import { styled, alpha } from "@mui/material/styles"
 import IconButton from "@mui/material/IconButton"
 import { Link } from "@mui/material"
 import { useRouter } from "next/router"
+import Button from "@mui/material/Button"
+
 import LoginIcon from "@mui/icons-material/Login"
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage"
 
 export function GuestHeader({ connectWallet }) {
     return (
         <AppBar position="static">
             <Toolbar>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    RentApp
-                </Typography>
+                <HolidayVillageIcon fontSize="large" sx={{ ml: 11, mr: 2 }} />
+                <Link href="/" color="inherit" fontSize={30} underline="none" variant="body1" sx={{ flexGrow: 1 }}>
+                    Renty
+                </Link>
 
-                <Link href="/" color="inherit" underline="none" variant="body2" sx={{ mx: 1 }}>
+                <Button href="/" color="inherit" variant="outlined" sx={{ mx: 1 }}>
                     HOME
-                </Link>
-                <Link href="/properties" color="inherit" underline="none" variant="body2" sx={{ mx: 1 }}>
+                </Button>
+                <Button href="/properties" color="inherit" variant="outlined" sx={{ mx: 1 }}>
                     PROPERTIES
-                </Link>
+                </Button>
                 <IconButton onClick={connectWallet} edge="start" color="inherit" aria-label="menu" sx={{ mx: 1 }}>
                     <LoginIcon />
                 </IconButton>

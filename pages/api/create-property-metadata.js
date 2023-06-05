@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 async function uploadPropertyDataToIPFS(propertyData) {
     const metadata = {
         name: "Property Details",
+        address: propertyData.address,
         area: propertyData.area,
         numberOfRooms: propertyData.numberOfRooms,
         floor: propertyData.floor,

@@ -3,16 +3,26 @@ import Link from "next/link"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../../constants/networkMapping.json"
-import rentAppAbi from "../../../constants/RentApp.json"
+import tenantManagerAbi from "../../../constants/TenantManager.json"
+import mainContractAbi from "../../../constants/MainContract.json"
 import { useSelector } from "react-redux"
-import { structureTenant } from "../../../utilities/structureStructs"
+import { MintSBTCard } from "../../../components/MintSBTCard"
+import { MyRentals } from "../../../components/MyRentals"
+import { structureRentContracts } from "../../../utilities/structureStructs"
 
-export default function MyRentals() {
+export default function MyRentalsPage() {
     const { wallet } = useSelector((states) => states.globalStates)
     const [tenantSBT, setTenantSBT] = React.useState("")
     const [tenantName, setTenantName] = React.useState("")
-    const [tenant, setTenant] = React.useState("")
-    const [signedRentContract, setSignedRentContract] = React.useState(false)
+    const [currentRentContractId, setCurrentContractId] = React.useState("")
+    const [rentContracts, setRentContracts] = React.useState([])
+    const [email, setEmail] = React.useState("")
+    const [phoneNumber, setPhoneNumber] = React.useState("")
+    const [alert, setAlert] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
+    const [alertMint, setAlertMint] = React.useState(false)
+    const [loadingMint, setLoadingMint] = React.useState(false)
+    const [conversionChecked, setConversionChecked] = React.useState(true)
 
     React.useEffect(() => {
         async function getSbtTokenId() {
@@ -22,39 +32,96 @@ export default function MyRentals() {
                     const provider = new ethers.providers.Web3Provider(ethereum)
                     const signer = provider.getSigner()
                     const userAddress = await signer.getAddress()
-                    const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                    const contractAbi = rentAppAbi
-                    const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
-                    const sbtTokenId = await contract.getSbtTokenId(userAddress)
-                    console.log(`User has soulbound token. Token ID: ${sbtTokenId}`)
+                    const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
+                    const contractAbi = tenantManagerAbi
+                    const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
+                    const sbtTokenId = await contract.getTokenId(userAddress)
+
                     return sbtTokenId
                 } catch (e) {
                     console.log(e)
                 }
             }
         }
-        async function getTenant(tokenId) {
+
+        async function getCurrentContract(tokenId) {
             if (typeof window !== "undefined") {
                 try {
                     ethereum = window.ethereum
                     const provider = new ethers.providers.Web3Provider(ethereum)
                     const signer = provider.getSigner()
-                    const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                    const contractAbi = rentAppAbi
-                    const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
-                    const tenant = structureTenant(await contract.getTenant(tokenId))
-                    console.log(tenant)
-                    return tenant
+
+                    const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                    const contractAbi = mainContractAbi
+                    const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+                    const contractId = await contract.getTenantCurrentContractId(tokenId)
+                    console.log(`User has valid rent contract. Contract ID: ${contractId}`)
+                    return contractId
                 } catch (e) {
                     console.log(e)
                 }
             }
         }
 
+        async function getUserRentApplications(tokenId) {
+            if (typeof window !== "undefined") {
+                ethereum = window.ethereum
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const signer = provider.getSigner()
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+
+                const tenantRentContracts = structureRentContracts(await contract.getTenantRentContracts(tokenId))
+
+                return tenantRentContracts
+            }
+        }
+        async function getUserEmail() {
+            if (typeof window !== "undefined") {
+                ethereum = window.ethereum
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const signer = provider.getSigner()
+                const userAddress = await signer.getAddress()
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+                const email = await contract.getUserEmail(userAddress)
+                console.log(`Email: `, email)
+                setEmail(email)
+            }
+        }
+        async function getUserPhoneNumber() {
+            if (typeof window !== "undefined") {
+                ethereum = window.ethereum
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const signer = provider.getSigner()
+                const userAddress = await signer.getAddress()
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+                const number = await contract.getUserPhoneNumber(userAddress)
+                console.log(`Phone Number: `, number)
+                setPhoneNumber(number)
+            }
+        }
+
         getSbtTokenId().then((tokenId) => {
             setTenantSBT(tokenId)
-            getTenant(tokenId).then((tenant) => setTenant(tenant))
+            console.log("Token ID is: ", tokenId)
+            if (tokenId !== undefined) {
+                getCurrentContract(tokenId).then((contractId) => {
+                    setCurrentContractId(contractId)
+                })
+                getUserRentApplications(tokenId).then((contracts) => {
+                    setRentContracts(contracts)
+                    console.log("Contracts: ", contracts)
+                    console.log("Rent Contract: ", rentContracts)
+                })
+            }
         })
+        getUserEmail()
+        getUserPhoneNumber()
     }, [])
 
     async function mintSoulboundToken(_name, _tokenURI) {
@@ -63,26 +130,40 @@ export default function MyRentals() {
             const provider = new ethers.providers.Web3Provider(ethereum)
             const signer = provider.getSigner()
             const userAddress = await signer.getAddress()
-            const rentAppAddress = networkMapping["11155111"].RentApp[0]
-            const contractAbi = rentAppAbi
-            const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+            const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
+            const contractAbi = tenantManagerAbi
+            const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
 
-            const propertyTx = await contract.mintSoulboundToken(_name, _tokenURI)
+            const propertyTx = await contract.mintSBT(_tokenURI, _name)
             // Wait for the transaction to be confirmed
             const propertyTxReceipt = await propertyTx.wait()
             // Get the property ID from the event emitted by the contract
             const events = propertyTxReceipt.events
             const soulboundTokenMintedEvent = events.find((e) => e.event === "SoulboundMinted")
             const sbtTokenId = soulboundTokenMintedEvent.args[1]
-
+            setAlertMint(true)
             console.log(`Soulbound token is minted. Token ID: ${sbtTokenId}`)
 
             return sbtTokenId
         }
     }
+    async function cancelRentApplication(propertyId, rentContractId) {
+        if (typeof window !== "undefined") {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            const cancel = await contract.cancelRentApplication(propertyId, rentContractId)
+            await cancel.wait()
+            setAlert(true)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoadingMint(true)
         const hashOfSbtMetadata = await fetch("/api/create-sbt", {
             method: "POST",
             body: JSON.stringify({ tenantName }),
@@ -91,54 +172,42 @@ export default function MyRentals() {
         const sbtTokenId = await mintSoulboundToken(tenantName, `https://gateway.pinata.cloud/ipfs/${hashOfSbtMetadata.sbtDataHas}`)
         setTenantSBT(sbtTokenId)
     }
+    const handleChange = () => {
+        setConversionChecked(!conversionChecked)
+    }
+
+    const handleCancelClick = (propertyId, rentContractId) => {
+        setLoading(true)
+        cancelRentApplication(propertyId, rentContractId)
+    }
 
     return (
-        <div>
-            <Head>
-                <title>My Rentals</title>
-            </Head>
-
+        <>
             {tenantSBT !== undefined ? (
-                <>
-                    <p>My Tenant Soulbound Token ID: {tenantSBT.toString()}</p>
-                    <p>
-                        <Link className="button-standart" href={`/${wallet}/myrentals/rent-applications`}>
-                            My Rent Applications
-                        </Link>
-                        This page will display all made applications and their statuses.
-                    </p>
-                    <p>
-                        <Link className="button-standart" href={`/${wallet}/myrentals/rent-history`}>
-                            My Rent History
-                        </Link>
-                    </p>
-                    {tenant.currentRentContractId == 0 ? (
-                        ""
-                    ) : (
-                        <p>
-                            <>
-                                <Link className="button-standart" href={`/${wallet}/myrentals/${tenant.currentRentContractId}`}>
-                                    My Rent Contract
-                                </Link>
-                            </>
-                        </p>
-                    )}
-                </>
+                <div>
+                    <MyRentals
+                        wallet={wallet}
+                        tenantSBT={tenantSBT}
+                        currentRentContractId={currentRentContractId}
+                        rentContracts={rentContracts}
+                        handleCancelClick={handleCancelClick}
+                        loading={loading}
+                        alert={alert}
+                        email={email}
+                        phoneNumber={phoneNumber}
+                        conversionChecked={conversionChecked}
+                        handleChange={handleChange}
+                    />
+                </div>
             ) : (
-                <>
-                    <form onSubmit={handleSubmit} className="form">
-                        <div className="form-field">
-                            <label>
-                                Name:
-                                <input type="text" value={tenantName} onChange={(e) => setTenantName(e.target.value)} />
-                            </label>
-                        </div>
-                        <button type="submit" className="button-standart">
-                            Create Soulbound Token
-                        </button>
-                    </form>
-                </>
+                <MintSBTCard
+                    tenantName={tenantName}
+                    handleSubmit={handleSubmit}
+                    setTenantName={setTenantName}
+                    loadingMint={loadingMint}
+                    alertMint={alertMint}
+                />
             )}
-        </div>
+        </>
     )
 }

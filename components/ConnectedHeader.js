@@ -1,31 +1,17 @@
 import React from "react"
 import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
-import Typography from "@mui/material/Typography"
 import IconButton from "@mui/material/IconButton"
 import MenuIcon from "@mui/icons-material/Menu"
 import MenuItem from "@mui/material/MenuItem"
 import Menu from "@mui/material/Menu"
+import Button from "@mui/material/Button"
 import { Link } from "@mui/material"
 import { useRouter } from "next/router"
 import ListItemIcon from "@mui/material/ListItemIcon"
-import { Settings, AccountCircle, ExitToApp } from "@mui/icons-material"
-import SendIcon from "@mui/icons-material/Send"
+import { AccountCircle } from "@mui/icons-material"
 import HomeIcon from "@mui/icons-material/Home"
-
-//WE NEED DISCONECT WALLET FUNCTION
-
-const truncate = (text, startChars, endChars, maxLength) => {
-    if (text.length > maxLength) {
-        let start = text.substring(0, startChars)
-        let end = text.substring(text.length - endChars, text.length)
-        while (start.length + end.length < maxLength) {
-            start = start + "."
-        }
-        return start + end
-    }
-    return text
-}
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage"
 
 export function ConnectedHeader({ wallet }) {
     const [anchorEl, setAnchorEl] = React.useState(null)
@@ -43,25 +29,26 @@ export function ConnectedHeader({ wallet }) {
     }
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" sx={{ alignContent: "center", pt: 1 }}>
             <Toolbar>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    RentApp
-                </Typography>
+                <HolidayVillageIcon fontSize="large" sx={{ ml: 11, mr: 2 }} />
+                <Link href="/" color="inherit" fontSize={30} underline="none" variant="body1" sx={{ flexGrow: 1 }}>
+                    Renty
+                </Link>
 
-                <Link href="/" color="inherit" underline="none" variant="body2" sx={{ mx: 1 }}>
+                <Button href="/" color="inherit" variant="outlined" sx={{ mx: 1 }}>
                     HOME
-                </Link>
-                <Link href="/properties" color="inherit" underline="none" variant="body2" sx={{ mx: 1 }}>
+                </Button>
+                <Button href="/properties" color="inherit" variant="outlined" sx={{ mx: 1 }}>
                     PROPERTIES
-                </Link>
+                </Button>
 
                 <IconButton onClick={handleMenuOpen} edge="start" color="inherit" aria-label="menu" sx={{ mx: 1 }}>
                     <MenuIcon />
                 </IconButton>
                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                     {/* Add your account menu options */}
-                    <MenuItem onClick={() => handleMenuItemClick(`/${wallet}/properties`)}>
+                    <MenuItem onClick={() => handleMenuItemClick(`/${wallet}/myproperties`)}>
                         <ListItemIcon>
                             <HomeIcon />
                         </ListItemIcon>
@@ -78,24 +65,6 @@ export function ConnectedHeader({ wallet }) {
                             <AccountCircle />
                         </ListItemIcon>
                         Account
-                    </MenuItem>
-                    <MenuItem onClick={() => handleMenuItemClick(`/${wallet}/messages`)}>
-                        <ListItemIcon>
-                            <SendIcon />
-                        </ListItemIcon>
-                        Messages
-                    </MenuItem>
-                    <MenuItem onClick={() => handleMenuItemClick(`/${wallet}/settings`)}>
-                        <ListItemIcon>
-                            <Settings />
-                        </ListItemIcon>
-                        Settings
-                    </MenuItem>
-                    <MenuItem /*onClick={}*/>
-                        <ListItemIcon>
-                            <ExitToApp />
-                        </ListItemIcon>
-                        Logout
                     </MenuItem>
                 </Menu>
             </Toolbar>

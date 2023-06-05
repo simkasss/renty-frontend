@@ -7,27 +7,30 @@ import { useRouter } from "next/router"
 import networkMapping from "../../../../constants/networkMapping.json"
 import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
+import { ListProperty } from "../../../../components/ListProperty"
 
 export default function listProperty() {
     const router = useRouter()
     const { propertyId: id } = router.query
-    const [properties, setProperties] = React.useState([])
-    const [alert, setAlert] = useState(false)
-    let provider, signer, userAddress, contractAbi, contract
 
-    const [description, setDescription] = React.useState("")
-    const [rentalTerm, setRentalTerm] = React.useState("")
-    const [rentalPrice, setRentalPrice] = React.useState("")
-    const [depositAmount, setDepositAmount] = React.useState("")
-    const [hashesOfPhotos, setHashesOfPhotos] = React.useState([])
-    const [hashOfRentalAggreement, setHashOfRentalAggreement] = React.useState("")
+    const [properties, setProperties] = React.useState([])
+    const [alert, setAlert] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
+    const [listPropertyData, setListPropertyData] = React.useState({
+        description: null,
+        rentalTerm: null,
+        rentalPrice: null,
+        depositAmount: null,
+        hashesOfPhotos: null,
+        hashOfRentalAggreement: null,
+    })
 
     const [rentalTermSeconds, setRentalTermSeconds] = React.useState("")
     const [numDays, setNumDays] = React.useState("")
-
     const [selectedPhotos, setSelectedPhotos] = React.useState([])
     const [file, setFile] = React.useState(null)
 
+    let provider, signer, userAddress, contractAbi, contract
     React.useEffect(() => {
         async function getUserProperties() {
             if (typeof window !== "undefined") {
@@ -58,9 +61,10 @@ export default function listProperty() {
 
         getUserProperties().then((properties) => {
             setProperties(properties)
+            console.log(properties)
         })
     }, [])
-
+    const selectedProperty = properties.find((property) => property.propertyNftId == parseInt(id))
     async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, _hashesOfPhotos, _hashOfRentalAggreement) {
         provider = new ethers.providers.Web3Provider(ethereum)
         signer = provider.getSigner()
@@ -89,15 +93,9 @@ export default function listProperty() {
         return propertyId
     }
 
-    const property = properties.find((property) => property.propertyNftId === parseInt(id))
-    if (!property) {
-        return <div>Property not found</div>
-    }
-    console.log("Property", property)
-
-    console.log(description, property.propertyNftId, rentalTerm, rentalPrice, depositAmount, hashOfRentalAggreement)
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
         let seconds = 0
         if (rentalTermSeconds === "month") {
             seconds = 30 * 24 * 60 * 60
@@ -111,26 +109,56 @@ export default function listProperty() {
             seconds = numDays * 24 * 60 * 60
         }
 
-        setRentalTerm(seconds)
+        setListPropertyData((data) => {
+            data.rentalTerm = seconds
+            return data
+        })
 
-        //Fix this
         const formData = new FormData()
         selectedPhotos.forEach((file, index) => {
             formData.append(`file_${index}`, file, `photo${index}.jpg`)
         })
-        console.log(formData.get("file_0"))
-        const response = await fetch("/api/upload-property-photos", {
+
+        const hashesOfPhotosResponse = await fetch("/api/upload-property-photos", {
             method: "POST",
             body: formData,
             contentType: "multipart/form-data",
-        }).then((response) => {
-            response.json()
-            console.log("Response: ", response)
+        }).then((response) => response.json())
+
+        console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse)
+        console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse.hashesOfPhotos)
+
+        setListPropertyData((data) => {
+            data.hashesOfPhotos = hashesOfPhotosResponse.hashesOfPhotos
+            return data
         })
 
-        //until here
-        // update hashofrentalagreement and add hashofphotos
-        await listProperty(description, property.propertyNftId, rentalTerm, rentalPrice, depositAmount, hashesOfPhotos, hashOfRentalAggreement)
+        const formData2 = new FormData()
+        formData2.append("rentalTermsAndConditions", file, "rentalTermsAndConditions.pdf")
+
+        const hashOfRentalTermsAndConditionsResponse = await fetch("/api/upload-terms-and-conditions", {
+            method: "POST",
+            body: formData2,
+            contentType: "multipart/form-data",
+        }).then((response) => response.json())
+
+        console.log("hashOfRentalTermsAndConditions Response: ", hashOfRentalTermsAndConditionsResponse)
+        console.log("hashOfRentalTermsAndConditions Response 2:  ", hashOfRentalTermsAndConditionsResponse.hash)
+
+        setListPropertyData((data) => {
+            data.hashOfRentalAggreement = hashOfRentalTermsAndConditionsResponse.hash
+            return data
+        })
+
+        await listProperty(
+            listPropertyData.description,
+            selectedProperty.propertyNftId,
+            listPropertyData.rentalTerm,
+            ethers.BigNumber.from(ethers.utils.parseUnits(listPropertyData.rentalPrice, 18)),
+            ethers.BigNumber.from(ethers.utils.parseUnits(listPropertyData.depositAmount, 18)),
+            listPropertyData.hashesOfPhotos,
+            listPropertyData.hashOfRentalAggreement
+        )
     }
 
     const handleRentalTermChange = (event) => {
@@ -147,70 +175,27 @@ export default function listProperty() {
         setSelectedPhotos(files)
     }
     const handleFileChange = (e) => {
+        console.log("Rental Terms and Cond.:  e.target.files: ", e.target.files)
         const file = e.target.files[0]
         setFile(file)
     }
 
     return (
-        <div>
-            <div>
-                <div>
-                    <Link href="/myproperties" className="back-button">
-                        Back
-                    </Link>
-
-                    <div>
-                        <div>Property ID: {property.propertyNftId}</div>
-                        <div>Property Name: {property.name}</div>
-                        <div> Status: {property.isRented === "true" ? "Rented" : "Vacant"}</div>
-                        {property.isRented === "true" ? <div> Rent Contract Id: {property.rentContractId} </div> : <></>}
-                        <form onSubmit={handleSubmit} className="form" enctype="multipart/form-data">
-                            <label>
-                                Description:
-                                <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
-                            </label>
-                            <label>
-                                Rental Term:
-                                <select value={rentalTermSeconds} onChange={handleRentalTermChange}>
-                                    <option value="year">Year</option>
-                                    <option value="month">Month</option>
-                                    <option value="three-months">Three Months</option>
-                                    <option value="six-months">Six Months</option>
-                                    <option value="custom">Select Number of Days</option>
-                                </select>
-                            </label>
-                            {rentalTermSeconds === "custom" && (
-                                <label>
-                                    Number of Days:
-                                    <input type="number" value={numDays} onChange={handleNumDaysChange} />
-                                </label>
-                            )}
-
-                            <label>
-                                Rental Price (WEI):
-                                <input type="number" value={rentalPrice} onChange={(e) => setRentalPrice(e.target.value)} />
-                            </label>
-                            <label>
-                                Deposit Amount (WEI):
-                                <input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} />
-                            </label>
-                            <label>
-                                Photos:
-                                <input type="file" multiple onChange={handlePhotosChange} />
-                            </label>
-                            <label>
-                                Rental Terms and Agreements:
-                                <input type="file" onChange={handleFileChange} />
-                            </label>
-
-                            <button type="submit" className="button-standart">
-                                List Property
-                            </button>
-                        </form>
-                        {alert ? <> Property is Listed! </> : <></>}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <ListProperty
+            {...{
+                properties,
+                alert,
+                loading,
+                listPropertyData,
+                setListPropertyData,
+                rentalTermSeconds,
+                handleRentalTermChange,
+                numDays,
+                handleNumDaysChange,
+                handlePhotosChange,
+                handleFileChange,
+                handleSubmit,
+            }}
+        />
     )
 }

@@ -4,6 +4,10 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { getListedProperties } from "../constants/blockchain"
 import { PropertyCard } from "../components/PropertyCard"
+import Switch from "@mui/material/Switch"
+import Typography from "@mui/material/Typography"
+import Stack from "@mui/material/Stack"
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 
 export default function ListedProperties({ listedProperties }) {
     const properties = listedProperties
@@ -11,13 +15,21 @@ export default function ListedProperties({ listedProperties }) {
     const handlePropertyClick = (property) => {
         router.push(`/properties/${property.propertyNftId}`)
     }
+    const [conversionChecked, setConversionChecked] = React.useState(true)
+    const handleChange = () => {
+        setConversionChecked(!conversionChecked)
+    }
 
     return (
         <div>
             <Head>
                 <title>Listed Properties</title>
             </Head>
-
+            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
+                <AttachMoneyIcon fontSize="small" />
+                <Switch checked={conversionChecked} onClick={handleChange} />
+                <Typography>ETH</Typography>
+            </Stack>
             <div className="container mx-auto px-4 py-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {properties.map((property) => (
@@ -27,13 +39,14 @@ export default function ListedProperties({ listedProperties }) {
                             id={property.propertyNftId}
                             rentalPrice={property.rentalPrice}
                             rentalTerm={property.rentalTerm}
+                            hashesOfPhotos={property.hashesOfPhotos}
+                            hashOfMetaData={property.hashOfMetaData}
+                            conversionChecked={conversionChecked}
                             onClick={() => handlePropertyClick(property)}
                         />
                     ))}
                 </div>
-                <div className="flex justify-center mt-4">
-                    <button className=" bg-violet-900 hover:bg-violet-800 text-white font-bold py-2 px-4 rounded">Load More</button>
-                </div>
+                <div className="flex justify-center mt-4"></div>
             </div>
         </div>
     )
