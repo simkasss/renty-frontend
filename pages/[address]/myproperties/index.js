@@ -9,14 +9,10 @@ import MyProperties from "../../../components/MyProperties"
 
 export default function MyPropertiesPage() {
     const [properties, setProperties] = React.useState([])
-    const [conversionChecked, setConversionChecked] = React.useState(true)
     const [email, setEmail] = React.useState("")
     const [phoneNumber, setPhoneNumber] = React.useState("")
     const { wallet } = useSelector((states) => states.globalStates)
-
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
-    }
+    const { conversionChecked } = useSelector((states) => states.globalStates)
 
     React.useEffect(() => {
         if (typeof window == "undefined") {
@@ -100,7 +96,6 @@ export default function MyPropertiesPage() {
             properties={properties}
             handlePropertyClick={handlePropertyClick}
             wallet={wallet}
-            handleChange={handleChange}
             conversionChecked={conversionChecked}
             handleLinkClick={handleLinkClick}
             email={email}

@@ -4,20 +4,15 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { getListedProperties } from "../constants/blockchain"
 import { PropertyCard } from "../components/PropertyCard"
-import Switch from "@mui/material/Switch"
-import Typography from "@mui/material/Typography"
-import Stack from "@mui/material/Stack"
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import { useSelector } from "react-redux"
 
 export default function ListedProperties({ listedProperties }) {
     const properties = listedProperties
+    const { conversionChecked } = useSelector((states) => states.globalStates)
+
     const router = useRouter()
     const handlePropertyClick = (property) => {
         router.push(`/properties/${property.propertyNftId}`)
-    }
-    const [conversionChecked, setConversionChecked] = React.useState(true)
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
     }
 
     return (
@@ -25,11 +20,7 @@ export default function ListedProperties({ listedProperties }) {
             <Head>
                 <title>Listed Properties</title>
             </Head>
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
+
             <div className="container mx-auto px-4 py-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {properties.map((property) => (

@@ -8,9 +8,10 @@ import Typography from "@mui/material/Typography"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 import Grid from "@mui/material/Grid"
 import { RentApplicationCardTenant } from "./RentApplicationCardTenant"
-import Switch from "@mui/material/Switch"
-import Stack from "@mui/material/Stack"
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import Alert from "@mui/material/Alert"
+import CheckIcon from "@mui/icons-material/Check"
+
+import CircularProgress from "@mui/material/CircularProgress"
 
 export function MyRentals({
     tenantSBT,
@@ -23,7 +24,6 @@ export function MyRentals({
     email,
     phoneNumber,
     conversionChecked,
-    handleChange,
 }) {
     return (
         <div>
@@ -35,15 +35,9 @@ export function MyRentals({
                 <Box
                     component="form"
                     sx={{
-                        "& > :not(style)": { ml: 5, mr: 5, width: "max" },
+                        "& > :not(style)": { ml: 5, mr: 5, width: "max", mt: 3 },
                     }}
                 >
-                    <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1, mb: 1 }}>
-                        <AttachMoneyIcon fontSize="small" />
-                        <Switch checked={conversionChecked} onClick={handleChange} />
-                        <Typography>ETH</Typography>
-                    </Stack>
-
                     <Card variant="outlined">
                         <React.Fragment>
                             <CardContent>
@@ -80,6 +74,8 @@ export function MyRentals({
                                         <Typography variant="h6" component="div" color="primary" sx={{ mt: 1 }}>
                                             My Rent Applications
                                         </Typography>
+                                        {alert ? <Alert icon={<CheckIcon fontSize="inherit" />}>Application is canceled!</Alert> : <></>}
+                                        {loading && !alert ? <CircularProgress size="2rem" /> : <></>}
                                         {rentContracts.length > 0 ? (
                                             <Grid container spacing={{ xs: 2, md: 1 }} columns={{ xs: 4, sm: 8, md: 16 }}>
                                                 {rentContracts.map((rentContract) => (
@@ -89,7 +85,6 @@ export function MyRentals({
                                                             rentContract={rentContract}
                                                             handleCancelClick={handleCancelClick}
                                                             loading={loading}
-                                                            alert={alert}
                                                             conversionChecked={conversionChecked}
                                                         />
                                                     </Grid>

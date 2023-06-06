@@ -18,7 +18,7 @@ import FormControl from "@mui/material/FormControl"
 export function ListProperty({
     loading,
     alert,
-    properties,
+    selectedProperty,
     listPropertyData,
     setListPropertyData,
     rentalTermSeconds,
@@ -29,9 +29,6 @@ export function ListProperty({
     handleFileChange,
     handleSubmit,
 }) {
-    const router = useRouter()
-    const { propertyId: id } = router.query
-    const selectedProperty = properties.find((property) => property.propertyNftId == parseInt(id))
     return (
         <>
             <Head>
@@ -89,10 +86,10 @@ export function ListProperty({
                                             color: "primary",
                                         }}
                                         onChange={(e) =>
-                                            setListPropertyData((data) => {
-                                                data.rentalPrice = e.target.value
-                                                return data
-                                            })
+                                            setListPropertyData((prevData) => ({
+                                                ...prevData,
+                                                rentalPrice: e.target.value,
+                                            }))
                                         }
                                     />
                                     <br />
@@ -103,10 +100,10 @@ export function ListProperty({
                                         variant="standard"
                                         fullWidth
                                         onChange={(e) =>
-                                            setListPropertyData((data) => {
-                                                data.depositAmount = e.target.value
-                                                return data
-                                            })
+                                            setListPropertyData((prevData) => ({
+                                                ...prevData,
+                                                depositAmount: e.target.value,
+                                            }))
                                         }
                                         size="small"
                                     />
@@ -119,10 +116,10 @@ export function ListProperty({
                                         variant="standard"
                                         value={listPropertyData.description}
                                         onChange={(e) =>
-                                            setListPropertyData((data) => {
-                                                data.description = e.target.value
-                                                return data
-                                            })
+                                            setListPropertyData((prevData) => ({
+                                                ...prevData,
+                                                description: e.target.value,
+                                            }))
                                         }
                                     />
                                     <br />

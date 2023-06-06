@@ -1,8 +1,5 @@
 import { useRouter } from "next/router"
-import Router from "next/router"
-import { PropertyDetails } from "@/components/PropertyCard"
 import { getListedProperties } from "@/constants/blockchain"
-import Link from "next/link"
 import React from "react"
 import { ethers } from "ethers"
 import networkMapping from "../../../constants/networkMapping.json"
@@ -106,15 +103,14 @@ export default function ApplyForRent({ listedProperties }) {
                     _daysValid
                 )
 
-                // Wait for the transaction to be confirmed
                 const propertyTxReceipt = await propertyTx.wait()
-                // Get the property ID from the event emitted by the contract
                 const events = propertyTxReceipt.events
                 const rentContractCreatedEvent = events.find((e) => e.event === "RentContractCreated")
                 const rentContractId = rentContractCreatedEvent.args[1]
 
                 console.log(`Rent Contract is created. Rent Contract ID: ${rentContractId}`)
                 setAlert(true)
+                router.push(`/${wallet}/myrentals`)
                 return rentContractId
             }
         } catch (e) {

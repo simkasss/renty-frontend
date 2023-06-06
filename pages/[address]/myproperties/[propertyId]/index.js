@@ -3,15 +3,10 @@ import React from "react"
 import { MyPropertyDetails } from "@/components/MyPropertyDetails"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
-import Link from "next/link"
 import { useSelector } from "react-redux"
 import networkMapping from "../../../../constants/networkMapping.json"
 import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
-import Switch from "@mui/material/Switch"
-import Typography from "@mui/material/Typography"
-import Stack from "@mui/material/Stack"
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 
 export default function Property() {
     const router = useRouter()
@@ -20,7 +15,8 @@ export default function Property() {
     const { wallet } = useSelector((states) => states.globalStates)
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
-    const [conversionChecked, setConversionChecked] = React.useState(true)
+    const { conversionChecked } = useSelector((states) => states.globalStates)
+
     React.useEffect(() => {
         async function getUserProperties() {
             if (typeof window !== "undefined") {
@@ -79,19 +75,12 @@ export default function Property() {
             const unlinst = await contract.removePropertyFromList(id)
             await unlinst.wait()
             setAlert(true)
+            router.push(`/${wallet}/myproperties`)
         }
-    }
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
     }
 
     return (
         <>
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
             <MyPropertyDetails
                 key={property.propertyNftId}
                 property={property}

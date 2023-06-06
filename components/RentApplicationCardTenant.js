@@ -4,13 +4,11 @@ import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
-import Alert from "@mui/material/Alert"
-import CheckIcon from "@mui/icons-material/Check"
-import CircularProgress from "@mui/material/CircularProgress"
 import SendIcon from "@mui/icons-material/Send"
 import networkMapping from "../constants/networkMapping.json"
 import mainContractAbi from "../constants/MainContract.json"
 import { structureProperty } from "../utilities/structureStructs"
+import { getWEIAmountInUSD } from "../utilities/currencyConversion"
 
 function convertTimestampToDate(timestampInSeconds) {
     const date = new Date(timestampInSeconds * 1000)
@@ -20,7 +18,7 @@ function convertTimestampToDate(timestampInSeconds) {
     return `${year}/${month}/${day}`
 }
 
-export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds, handleCancelClick, alert, loading, conversionChecked }) {
+export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds, handleCancelClick, conversionChecked }) {
     let status
     if (rentContract.status === 0) {
         status = "Waiting"
@@ -65,7 +63,6 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(owner)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(owner) {
@@ -77,7 +74,6 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(owner)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
         async function getProperty() {
@@ -90,20 +86,10 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
             const property = structureProperty(await contract.getProperty(rentContract.propertyNftId))
             return property
         }
-        async function getWEIAmountInUSD(ethAmount) {
-            if (typeof window !== "undefined") {
-                ethereum = window.ethereum
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const mainContractAddress = networkMapping["11155111"].MainContract[0]
-                const contractAbi = mainContractAbi
-                const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
-                const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
-                const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
-                return amountInUsd
-            }
+        async function currencyConversion(ethAmount) {
+            const usd = await getWEIAmountInUSD(ethAmount)
+            return usd
         }
-
-        console.log("conversionchecked", conversionChecked)
 
         getContract().then((contract) => {
             getPropertyOwner(contract).then((owner) => {
@@ -111,14 +97,13 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
                 getPhoneNumber(owner)
             })
         })
-        getWEIAmountInUSD(rentContract.rentalPrice).then((amountInUsd) => setRentalPriceInUsd(amountInUsd))
-        getWEIAmountInUSD(rentContract.depositAmount).then((amountInUsd) => setDepositInUsd(amountInUsd))
+        currencyConversion(rentContract.rentalPrice).then((amountInUsd) => setRentalPriceInUsd(amountInUsd))
+        currencyConversion(rentContract.depositAmount).then((amountInUsd) => setDepositInUsd(amountInUsd))
 
         getProperty().then((property) => {
             setProperty(property)
         })
     }, [])
-    console.log("conversionchecked", conversionChecked)
     return (
         <>
             <Card sx={{ maxWidth: 345, m: 2 }}>
@@ -127,7 +112,7 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
                         Rent Application No. {rentContract.id}
                     </Typography>
                     <Typography variant="body2" color="primary">
-                        Rental Price: {conversionChecked ? `${property.rentalPrice} ETH/month` : `${rentalPriceInUsd} USD/month`}
+                        Rental Price: {conversionChecked ? `${rentalPriceInUsd} USD/month` : `${property.rentalPrice} ETH/month`}
                     </Typography>
                     {rentContract.validityTerm < nowTimestampInSeconds ? (
                         <Typography variant="body2" color="primary">
@@ -147,7 +132,7 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Deposit Amount:
-                        {conversionChecked ? ` ${rentContract.depositAmount} ETH` : ` ${depositInUsd} USD`}
+                        {conversionChecked ? ` ${depositInUsd} USD` : ` ${rentContract.depositAmount} ETH`}
                     </Typography>
 
                     <Typography variant="body2" color="text.secondary">
@@ -199,7 +184,7 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
                                 <></>
                             ) : (
                                 <>
-                                    {!alert && status === "Waiting" ? (
+                                    {status === "Waiting" ? (
                                         <>
                                             <Button
                                                 variant="outlined"
@@ -209,13 +194,7 @@ export function RentApplicationCardTenant({ rentContract, nowTimestampInSeconds,
                                             >
                                                 Cancel
                                             </Button>
-                                            {loading ? <CircularProgress size="2rem" /> : <></>}
                                         </>
-                                    ) : (
-                                        <></>
-                                    )}
-                                    {alert && status == "Canceled" ? (
-                                        <Alert icon={<CheckIcon fontSize="inherit" />}>Application is canceled!</Alert>
                                     ) : (
                                         <></>
                                     )}

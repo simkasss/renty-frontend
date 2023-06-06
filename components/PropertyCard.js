@@ -5,9 +5,7 @@ import CardContent from "@mui/material/CardContent"
 import CardMedia from "@mui/material/CardMedia"
 import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
-import { ethers } from "ethers"
-import networkMapping from "../constants/networkMapping.json"
-import mainContractAbi from "../constants/MainContract.json"
+import { getWEIAmountInUSD } from "../utilities/currencyConversion"
 
 export function PropertyCard({ name, rentalPrice, rentalTerm, hashesOfPhotos, hashOfMetaData, onClick, conversionChecked }) {
     const [address, setAddress] = React.useState("")
@@ -24,24 +22,12 @@ export function PropertyCard({ name, rentalPrice, rentalTerm, hashesOfPhotos, ha
                 })
                 .catch((error) => console.error(error))
         }
-        async function getWEIAmountInUSD(ethAmount) {
-            if (typeof window !== "undefined") {
-                ethereum = window.ethereum
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const mainContractAddress = networkMapping["11155111"].MainContract[0]
-                const contractAbi = mainContractAbi
-                const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
-                const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
-                console.log("amountInWei: ", Number(amountInWei))
-                const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
-                console.log("amount in usd: ", Number(amountInUsd))
-                setRentalPriceInUsd(amountInUsd)
-
-                return amountInUsd
-            }
+        async function currencyConversion(ethAmount) {
+            const usd = await getWEIAmountInUSD(ethAmount)
+            setRentalPriceInUsd(usd)
         }
         getPropertyData()
-        getWEIAmountInUSD(rentalPrice)
+        currencyConversion(rentalPrice)
     }, [])
 
     return (
@@ -53,7 +39,7 @@ export function PropertyCard({ name, rentalPrice, rentalTerm, hashesOfPhotos, ha
                         {name}
                     </Typography>
                     <Typography variant="body1" component="div" color="primary">
-                        {conversionChecked ? `${rentalPrice} ETH/month` : `${rentalPriceInUsd} USD/month`}
+                        {conversionChecked ? `${rentalPriceInUsd} USD/month` : `${rentalPrice} ETH/month`}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         {address}

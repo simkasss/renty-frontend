@@ -1,5 +1,3 @@
-import Head from "next/head"
-import Link from "next/link"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../../../constants/networkMapping.json"
@@ -7,7 +5,6 @@ import mainContractAbi from "../../../../constants/MainContract.json"
 import transfersAndDisputesAbi from "../../../../constants/TransfersAndDisputes.json"
 import { useSelector } from "react-redux"
 import { structureProperty, structureRentContract, structurePayments, structureDisputes } from "../../../../utilities/structureStructs"
-
 import { useRouter } from "next/router"
 import { RentContractCardTenant } from "../../../../components/RentContractCardTenant"
 
@@ -55,7 +52,7 @@ export default function RentContract() {
     const [property, setProperty] = React.useState("")
     const [payments, setPayments] = React.useState([])
     const [disputes, setDisputes] = React.useState([])
-    const [conversionChecked, setConversionChecked] = React.useState(true)
+    const { conversionChecked } = useSelector((states) => states.globalStates)
     const [showPaymentHistory, setShowPaymentHistory] = React.useState(false)
     const [showDisputes, setShowDisputes] = React.useState(false)
     const [disputeDescription, setDisputeDescription] = React.useState("")
@@ -76,11 +73,7 @@ export default function RentContract() {
     const [phoneNumber, setPhoneNumber] = React.useState("")
     const [showContactDetails, setShowContactDetails] = React.useState(false)
     const [depositReleasePermission, setDepositReleasePermission] = React.useState(false)
-    const [rentalPriceInUsd, setRentalPriceInUsd] = React.useState("")
-    const [depositInUsd, setDepositInUsd] = React.useState("")
-    const [transferedDepositInUsd, setTransferedDepositInUsd] = React.useState("")
-    const [totalRentPaidInUsd, setTotalRentPaidInUsd] = React.useState("")
-    const [totalRequiredInUsd, setTotalRequiredInUsd] = React.useState("")
+    const { wallet } = useSelector((states) => states.globalStates)
 
     async function getMainContract() {
         ethereum = window.ethereum
@@ -189,6 +182,7 @@ export default function RentContract() {
                         getEmail(owner)
                         getPhoneNumber(owner)
                     })
+
                     getTransfersAndDisputesContract()
                         .then((transfersAndDisputesContract) => {
                             getDisputes({ rentContract, transfersAndDisputesContract }).then((disputes) => setDisputes(disputes))
@@ -201,6 +195,7 @@ export default function RentContract() {
                             })
                             getRequiredPaidAmount(rentContract).then((requiredPaidAmount) => setTotalRequiredRentAmount(requiredPaidAmount))
                         })
+
                         .catch((e) => {
                             console.log(e)
                         })
@@ -281,47 +276,16 @@ export default function RentContract() {
         setTerminateLoading(true)
         const contract = await getMainContract()
         const disputesContract = await getTransfersAndDisputesContract()
-        await contract.terminateRentContract(rentContract.propertyNftId, rentContract.id)
         const createDispute = await disputesContract.createDispute(rentContract.id, "Contract was terminated before expiry date")
         await createDispute.wait()
+        await contract.terminateRentContract(rentContract.propertyNftId, rentContract.id)
         setTerminateAlert(true)
-    }
-
-    async function releaseDeposit() {
-        const contract = await getTransfersAndDisputesContract()
-        await contract.releaseDeposit(rentContract.id)
-    }
-
-    async function getWEIAmountInUSD(ethAmount) {
-        if (typeof window !== "undefined") {
-            ethereum = window.ethereum
-            const provider = new ethers.providers.Web3Provider(ethereum)
-            const mainContractAddress = networkMapping["11155111"].MainContract[0]
-            const contractAbi = mainContractAbi
-            const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
-            const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
-            console.log("amountInWei: ", Number(amountInWei))
-            const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
-            console.log("amount in usd: ", Number(amountInUsd))
-
-            return amountInUsd
-        }
+        router.push(`/${wallet}/myrentals/rent-history`)
     }
 
     function handlePaymentHistoryClick() {
         setShowPaymentHistory(!showPaymentHistory)
         getPaymentHistory()
-    }
-
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
-        getWEIAmountInUSD(rentContract.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
-        getWEIAmountInUSD(rentContract.depositAmount).then((usd) => setDepositInUsd(usd))
-        getWEIAmountInUSD(depositTransfered.toString()).then((usd) => setTransferedDepositInUsd(usd))
-        getWEIAmountInUSD(totalRentPaid.toString()).then((usd) => setTotalRentPaidInUsd(usd))
-        if (totalRequiredRentAmount > 0) {
-            getWEIAmountInUSD(totalRequiredRentAmount.toString()).then((usd) => setTotalRequiredInUsd(usd))
-        }
     }
 
     return (
@@ -361,15 +325,8 @@ export default function RentContract() {
                     setShowContactDetails,
                     showContactDetails,
                     depositReleasePermission,
-                    releaseDeposit,
                     nowTimestampInSeconds,
-                    handleChange,
                     conversionChecked,
-                    rentalPriceInUsd,
-                    depositInUsd,
-                    transferedDepositInUsd,
-                    totalRentPaidInUsd,
-                    totalRequiredInUsd,
                 }}
             />
         )

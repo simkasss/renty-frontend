@@ -21,15 +21,7 @@ function convertTimestampToDate(timestampInSeconds) {
     return `${year}/${month}/${day}`
 }
 
-export function RentApplicationCard({
-    rentContract,
-    nowTimestampInSeconds,
-    handleAcceptClick,
-    showTenantRentHistory,
-    setShowTenantRentHistory,
-    setShowContactDetails,
-    showContactDetails,
-}) {
+export function RentApplicationCard({ rentContract, nowTimestampInSeconds, handleAcceptClick }) {
     let status
     if (rentContract.status === 0) {
         status = "Waiting"
@@ -41,6 +33,8 @@ export function RentApplicationCard({
     const [tenantRentHistory, setTenantRentHistory] = React.useState([])
     const [email, setEmail] = React.useState("")
     const [phoneNumber, setPhoneNumber] = React.useState("")
+    const [showTenantRentHistory, setShowTenantRentHistory] = React.useState(false)
+    const [showContactDetails, setShowContactDetails] = React.useState(false)
 
     React.useEffect(() => {
         if (typeof window == "undefined") {

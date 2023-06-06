@@ -26,6 +26,10 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
     const [showContactDetails, setShowContactDetails] = React.useState(false)
     const [showPaymentHistory, setShowPaymentHistory] = React.useState(false)
     const [payments, setPayments] = React.useState([])
+    const [depositReleasePermission, setDepositReleasePermission] = React.useState(false)
+    const [depositTransfered, setDepositTransfered] = React.useState(0)
+    const [depositAlert, setDepositAlert] = React.useState(false)
+    const [depositLoading, setDepositLoading] = React.useState(false)
 
     React.useEffect(() => {
         async function getProperty(id) {
@@ -87,6 +91,33 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
             const payments = structurePayments(await contract.getRentContractPaymentHistory(rentContract.id))
             return payments
         }
+        async function getDepositReleasePermission(rentContractId) {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+            const contractAbi = transfersAndDisputesAbi
+            const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+            const bool = await contract.depositReleasePermission(rentContractId)
+            return bool
+        }
+        async function getDeposit(rentContract) {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+            const contractAbi = transfersAndDisputesAbi
+            const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+            console.log("rentContract.propertyNftId", rentContract.propertyNftId)
+            const transferedDepositAmount = await contract.getDeposit(rentContract.id)
+            console.log("Transfered Deposit Amount: ", ethers.utils.formatEther(transferedDepositAmount))
+            return ethers.utils.formatEther(transferedDepositAmount)
+        }
+
+        getDepositReleasePermission(rentContract.id).then((bool) => {
+            console.log(bool)
+            setDepositReleasePermission(bool)
+        })
 
         getPaymentHistory().then((payments) => {
             setPayments(payments)
@@ -100,10 +131,23 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
         getProperty(rentContract.propertyNftId).then((property) => {
             setProperty(property)
         })
+        getDeposit(rentContract).then((deposit) => setDepositTransfered(deposit))
     }, [])
 
     function handlePaymentHistoryClick() {
         setShowPaymentHistory(!showPaymentHistory)
+    }
+    async function allowDepositRelease() {
+        setDepositLoading(true)
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
+        const contractAbi = transfersAndDisputesAbi
+        const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
+        const allowRelease = await contract.allowDepositRelease(rentContract.id)
+        await allowRelease.wait()
+        setDepositAlert(true)
     }
     return (
         <RentHistoryCardLandlord
@@ -116,6 +160,11 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
             showPaymentHistory={showPaymentHistory}
             payments={payments}
             handlePaymentHistoryClick={handlePaymentHistoryClick}
+            depositReleasePermission={depositReleasePermission}
+            allowDepositRelease={allowDepositRelease}
+            depositTransfered={depositTransfered}
+            depositLoading={depositLoading}
+            depositAlert={depositAlert}
         />
     )
 }

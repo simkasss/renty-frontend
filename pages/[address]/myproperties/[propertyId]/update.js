@@ -8,11 +8,12 @@ import networkMapping from "../../../../constants/networkMapping.json"
 import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
 import { UpdateProperty } from "../../../../components/UpdateProperty"
+import { useSelector } from "react-redux"
 
 export default function updateProperty() {
     const router = useRouter()
     const { propertyId: id } = router.query
-
+    const { wallet } = useSelector((states) => states.globalStates)
     const [properties, setProperties] = React.useState([])
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
@@ -87,7 +88,6 @@ export default function updateProperty() {
             })
         })
     }, [id])
-    // ADD ASYNC UPDATE FUNCTION
 
     async function updateProperty(
         _name,
@@ -117,6 +117,7 @@ export default function updateProperty() {
         )
         await propertyTx.wait()
         setAlert(true)
+        router.push(`/${wallet}/myproperties`)
     }
 
     const handleSubmit = async (e) => {

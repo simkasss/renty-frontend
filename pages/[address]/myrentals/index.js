@@ -22,7 +22,7 @@ export default function MyRentalsPage() {
     const [loading, setLoading] = React.useState(false)
     const [alertMint, setAlertMint] = React.useState(false)
     const [loadingMint, setLoadingMint] = React.useState(false)
-    const [conversionChecked, setConversionChecked] = React.useState(true)
+    const { conversionChecked } = useSelector((states) => states.globalStates)
 
     React.useEffect(() => {
         async function getSbtTokenId() {
@@ -71,10 +71,9 @@ export default function MyRentalsPage() {
                 const mainContractAddress = networkMapping["11155111"].MainContract[0]
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
-
                 const tenantRentContracts = structureRentContracts(await contract.getTenantRentContracts(tokenId))
-
-                return tenantRentContracts
+                const waitingTenantRentApplications = tenantRentContracts.filter((contract) => contract.status === 0)
+                return waitingTenantRentApplications
             }
         }
         async function getUserEmail() {
@@ -172,9 +171,6 @@ export default function MyRentalsPage() {
         const sbtTokenId = await mintSoulboundToken(tenantName, `https://gateway.pinata.cloud/ipfs/${hashOfSbtMetadata.sbtDataHas}`)
         setTenantSBT(sbtTokenId)
     }
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
-    }
 
     const handleCancelClick = (propertyId, rentContractId) => {
         setLoading(true)
@@ -196,7 +192,6 @@ export default function MyRentalsPage() {
                         email={email}
                         phoneNumber={phoneNumber}
                         conversionChecked={conversionChecked}
-                        handleChange={handleChange}
                     />
                 </div>
             ) : (

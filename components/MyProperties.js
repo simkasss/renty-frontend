@@ -12,26 +12,13 @@ import Stack from "@mui/material/Stack"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 
-export default function MyProperties({
-    properties,
-    handlePropertyClick,
-    wallet,
-    handleLinkClick,
-    conversionChecked,
-    handleChange,
-    email,
-    phoneNumber,
-}) {
+export default function MyProperties({ properties, handlePropertyClick, wallet, handleLinkClick, conversionChecked, email, phoneNumber }) {
     return (
         <div>
             <Head>
                 <title>My Properties</title>
             </Head>
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
+
             <Box
                 sx={{
                     "& > :not(style)": { ml: 5, mt: 1, mr: 5, mb: 5, width: "max" },

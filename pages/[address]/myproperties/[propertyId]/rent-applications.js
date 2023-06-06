@@ -5,6 +5,7 @@ import Switch from "@mui/material/Switch"
 import Typography from "@mui/material/Typography"
 import Stack from "@mui/material/Stack"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import { useSelector } from "react-redux"
 import { useRouter } from "next/router"
 import networkMapping from "../../../../constants/networkMapping.json"
 import mainContractAbi from "../../../../constants/MainContract.json"
@@ -13,18 +14,18 @@ import { RentApplicationCard } from "../../../../components/RentApplicationCard"
 import Alert from "@mui/material/Alert"
 import CheckIcon from "@mui/icons-material/Check"
 import CircularProgress from "@mui/material/CircularProgress"
+import Grid from "@mui/material/Grid"
 
 export default function PropertyRentApplications() {
     const router = useRouter()
 
     const { propertyId } = router.query
+    const { wallet } = useSelector((states) => states.globalStates)
 
     const [rentContracts, setRentContracts] = React.useState([])
     const [propertyListed, setPropertyListed] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [alert, setAlert] = React.useState(false)
-    const [showTenantRentHistory, setShowTenantRentHistory] = React.useState(false)
-    const [showContactDetails, setShowContactDetails] = React.useState(false)
     const [conversionChecked, setConversionChecked] = React.useState(true)
 
     React.useEffect(() => {
@@ -101,6 +102,7 @@ export default function PropertyRentApplications() {
             const accept = await contract.acceptRentContract(rentContract.propertyNftId, rentContract.id)
             await accept.wait()
             setAlert(true)
+            router.push(`/${wallet}/myproperties/${propertyId}/rent-contract`)
         }
     }
 
@@ -111,23 +113,15 @@ export default function PropertyRentApplications() {
     }
     const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
 
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
-    }
-
     return (
         <div>
             <Head>
                 <title>Rent Applications</title>
             </Head>
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
+
             {propertyListed == true ? (
                 <>
-                    {rentContracts.length == 0 ? (
+                    {rentContracts.filter((contract) => contract.status == 0).length == 0 ? (
                         <Typography gutterBottom variant="h6" component="div" color="primary" sx={{ m: 2 }}>
                             {" "}
                             This property do not have rent applications yet!
@@ -143,21 +137,21 @@ export default function PropertyRentApplications() {
                         </Alert>
                     )}
 
-                    {rentContracts
-                        .filter((contract) => contract.status == 0)
-                        .map((contract) => (
-                            <>
-                                <RentApplicationCard
-                                    rentContract={contract}
-                                    handleAcceptClick={() => handleAcceptClick(contract)}
-                                    nowTimestampInSeconds={nowTimestampInSeconds}
-                                    showTenantRentHistory={showTenantRentHistory}
-                                    setShowTenantRentHistory={setShowTenantRentHistory}
-                                    setShowContactDetails={setShowContactDetails}
-                                    showContactDetails={showContactDetails}
-                                />
-                            </>
-                        ))}
+                    <Grid container spacing={{ xs: 2, md: 1 }} columns={{ xs: 4, sm: 8, md: 16 }}>
+                        {rentContracts
+                            .filter((contract) => contract.status == 0)
+                            .map((contract) => (
+                                <>
+                                    <Grid item xs={2} sm={4} md={4}>
+                                        <RentApplicationCard
+                                            rentContract={contract}
+                                            handleAcceptClick={() => handleAcceptClick(contract)}
+                                            nowTimestampInSeconds={nowTimestampInSeconds}
+                                        />
+                                    </Grid>
+                                </>
+                            ))}
+                    </Grid>
                 </>
             ) : (
                 <Typography gutterBottom variant="h6" component="div" sx={{ m: 1 }}>

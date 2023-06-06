@@ -14,6 +14,10 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import SendIcon from "@mui/icons-material/Send"
 import { Payment } from "./Payment"
 import { Grid } from "@mui/material"
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
+import CircularProgress from "@mui/material/CircularProgress"
+import Alert from "@mui/material/Alert"
+import CheckIcon from "@mui/icons-material/Check"
 
 function convertTimestampToDate(timestampInSeconds) {
     const date = new Date(timestampInSeconds * 1000)
@@ -33,6 +37,11 @@ export function RentHistoryCardTenant({
     email,
     phoneNumber,
     payments,
+    depositReleasePermission,
+    releaseDeposit,
+    depositAlert,
+    depositTransfered,
+    depositLoading,
 }) {
     const nowInSeconds = Math.floor(Date.now() / 1000)
     let status
@@ -110,6 +119,27 @@ export function RentHistoryCardTenant({
                                             </TableCell>
                                             <TableCell align="left">{status}</TableCell>
                                         </TableRow>
+                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell component="th" scope="row">
+                                                Locked deposit
+                                            </TableCell>
+                                            <TableCell align="left">{depositTransfered} ETH</TableCell>
+                                        </TableRow>
+                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell component="th" scope="row">
+                                                Release Of Deposit
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                {depositReleasePermission == false ? (
+                                                    <>
+                                                        Not allowed
+                                                        <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />{" "}
+                                                    </>
+                                                ) : (
+                                                    "Allowed"
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
                                     </TableBody>
                                 </Table>
                             </TableContainer>
@@ -127,7 +157,24 @@ export function RentHistoryCardTenant({
                             ) : (
                                 <></>
                             )}
-
+                            {!depositReleasePermission || depositTransfered == 0 ? (
+                                ""
+                            ) : !depositAlert ? (
+                                <>
+                                    <Button
+                                        startIcon={<AttachMoneyIcon />}
+                                        sx={{ mr: 1, mt: 1 }}
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={releaseDeposit}
+                                    >
+                                        Release Deposit
+                                    </Button>
+                                    {depositLoading ? <CircularProgress size="1rem" /> : <></>}
+                                </>
+                            ) : (
+                                <Alert icon={<CheckIcon fontSize="inherit" />}>Deposit is returned!</Alert>
+                            )}
                             <br />
                             <Button
                                 startIcon={<SendIcon />}

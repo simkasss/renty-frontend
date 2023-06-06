@@ -14,8 +14,10 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import SendIcon from "@mui/icons-material/Send"
 import { Payment } from "./Payment"
 import { Grid } from "@mui/material"
-
-import NotInterestedIcon from "@mui/icons-material/NotInterested"
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
+import CircularProgress from "@mui/material/CircularProgress"
+import Alert from "@mui/material/Alert"
+import CheckIcon from "@mui/icons-material/Check"
 
 function convertTimestampToDate(timestampInSeconds) {
     const date = new Date(timestampInSeconds * 1000)
@@ -35,8 +37,13 @@ export function RentHistoryCardLandlord({
     email,
     phoneNumber,
     payments,
+    depositReleasePermission,
+    allowDepositRelease,
+    depositAlert,
+    depositTransfered,
+    depositLoading,
 }) {
-    const nowInSeconds = Math.floor(Date.now() / 1000)
+    const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
     let status
     if (rentContract.status == 1) {
         status = "Current"
@@ -44,7 +51,7 @@ export function RentHistoryCardLandlord({
         status = "Canceled"
     } else if (rentContract.status == 0) {
         status = "Waiting"
-    } else if (rentContract.expiryTimestamp < nowInSeconds) {
+    } else if (rentContract.expiryTimestamp < nowTimestampInSeconds) {
         status = "Completed"
     }
 
@@ -112,10 +119,30 @@ export function RentHistoryCardLandlord({
                                             </TableCell>
                                             <TableCell align="left">{status}</TableCell>
                                         </TableRow>
+                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell component="th" scope="row">
+                                                Locked deposit
+                                            </TableCell>
+                                            <TableCell align="left">{depositTransfered} ETH</TableCell>
+                                        </TableRow>
+                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                                            <TableCell component="th" scope="row">
+                                                Release Of Deposit
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                {depositReleasePermission == false ? (
+                                                    <>
+                                                        Not allowed
+                                                        <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />{" "}
+                                                    </>
+                                                ) : (
+                                                    "Allowed"
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-
                             {property.hashOfRentalAgreement ? (
                                 <Button
                                     sx={{ mt: 1 }}
@@ -129,8 +156,26 @@ export function RentHistoryCardLandlord({
                             ) : (
                                 <></>
                             )}
-
-                            <br />
+                            <br />{" "}
+                            {depositReleasePermission && rentContract.expiryTimestamp < nowTimestampInSeconds ? (
+                                ""
+                            ) : !depositAlert ? (
+                                <>
+                                    <Button
+                                        startIcon={<AttachMoneyIcon />}
+                                        sx={{ mr: 1, mt: 1 }}
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={allowDepositRelease}
+                                    >
+                                        Allow Deposit Release
+                                    </Button>
+                                    {depositLoading ? <CircularProgress size="1rem" sx={{ ml: 1 }} /> : <></>}
+                                    <br />
+                                </>
+                            ) : (
+                                <Alert icon={<CheckIcon fontSize="inherit" />}>Deposit release is allowed!</Alert>
+                            )}
                             <Button
                                 startIcon={<SendIcon />}
                                 sx={{ mr: 1, mt: 1 }}
@@ -140,7 +185,6 @@ export function RentHistoryCardLandlord({
                             >
                                 Tenant
                             </Button>
-
                             {showContactDetails ? (
                                 <>
                                     <Typography variant="body1" component="div" color="primary" sx={{ mt: 1 }}>
@@ -166,7 +210,6 @@ export function RentHistoryCardLandlord({
                                     </Button>
                                 </>
                             )}
-
                             {showPaymentHistory ? (
                                 <>
                                     <Typography variant="body1" component="div" sx={{ mt: 1, mb: 1 }}>

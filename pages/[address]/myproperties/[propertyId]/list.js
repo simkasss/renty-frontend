@@ -1,6 +1,4 @@
-import Head from "next/head"
-import Link from "next/link"
-import { useState } from "react"
+import { useSelector } from "react-redux"
 import { ethers } from "ethers"
 import React from "react"
 import { useRouter } from "next/router"
@@ -12,17 +10,18 @@ import { ListProperty } from "../../../../components/ListProperty"
 export default function listProperty() {
     const router = useRouter()
     const { propertyId: id } = router.query
-
+    const { wallet } = useSelector((states) => states.globalStates)
     const [properties, setProperties] = React.useState([])
+    const [selectedProperty, setSelectedProperty] = React.useState("")
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [listPropertyData, setListPropertyData] = React.useState({
-        description: null,
-        rentalTerm: null,
-        rentalPrice: null,
-        depositAmount: null,
-        hashesOfPhotos: null,
-        hashOfRentalAggreement: null,
+        description: "",
+        rentalTerm: "",
+        rentalPrice: "",
+        depositAmount: "",
+        hashesOfPhotos: "",
+        hashOfRentalAggreement: "",
     })
 
     const [rentalTermSeconds, setRentalTermSeconds] = React.useState("")
@@ -32,6 +31,9 @@ export default function listProperty() {
 
     let provider, signer, userAddress, contractAbi, contract
     React.useEffect(() => {
+        if (id === undefined) {
+            return
+        }
         async function getUserProperties() {
             if (typeof window !== "undefined") {
                 ethereum = window.ethereum
@@ -55,16 +57,36 @@ export default function listProperty() {
                     })
                     return userProperty
                 })
+                setProperties(userProperties)
+                console.log(userProperties)
                 return userProperties
             }
         }
+        async function getSelectedProperty(properties) {
+            const property = properties.find((property) => property.propertyNftId == parseInt(id))
+            console.log("PROPERTY: ", property)
+            return property
+        }
 
         getUserProperties().then((properties) => {
-            setProperties(properties)
-            console.log(properties)
+            getSelectedProperty(properties).then((property) => {
+                setSelectedProperty(property)
+                console.log(selectedProperty, "selected")
+                setListPropertyData((data) => {
+                    console.log("data1", data)
+                    data.name = property.name
+                    data.depositAmount = property.depositAmount
+                    data.rentalPrice = property.rentalPrice
+                    data.description = property.description
+                    data.rentalTerm = property.rentalTerm
+                    data.hashesOfPhotos = property.hashesOfPhotos
+                    data.hashOfRentalAgreement = property.hashOfRentalAgreement
+                    return data
+                })
+            })
         })
-    }, [])
-    const selectedProperty = properties.find((property) => property.propertyNftId == parseInt(id))
+    }, [id])
+
     async function listProperty(_description, _propertyNftId, _rentalTerm, _rentalPrice, _depositAmount, _hashesOfPhotos, _hashOfRentalAggreement) {
         provider = new ethers.providers.Web3Provider(ethereum)
         signer = provider.getSigner()
@@ -90,6 +112,7 @@ export default function listProperty() {
 
         console.log(`Property is listed. Property ID: ${propertyId}`)
         setAlert(true)
+        router.push(`/${wallet}/myproperties`)
         return propertyId
     }
 
@@ -114,42 +137,44 @@ export default function listProperty() {
             return data
         })
 
-        const formData = new FormData()
-        selectedPhotos.forEach((file, index) => {
-            formData.append(`file_${index}`, file, `photo${index}.jpg`)
-        })
+        if (selectedPhotos.length > 0) {
+            const formData = new FormData()
+            selectedPhotos.forEach((file, index) => {
+                formData.append(`file_${index}`, file, `photo${index}.jpg`)
+            })
 
-        const hashesOfPhotosResponse = await fetch("/api/upload-property-photos", {
-            method: "POST",
-            body: formData,
-            contentType: "multipart/form-data",
-        }).then((response) => response.json())
+            const hashesOfPhotosResponse = await fetch("/api/upload-property-photos", {
+                method: "POST",
+                body: formData,
+                contentType: "multipart/form-data",
+            }).then((response) => response.json())
 
-        console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse)
-        console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse.hashesOfPhotos)
+            console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse)
+            console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse.hashesOfPhotos)
 
-        setListPropertyData((data) => {
-            data.hashesOfPhotos = hashesOfPhotosResponse.hashesOfPhotos
-            return data
-        })
+            setListPropertyData((data) => {
+                data.hashesOfPhotos = hashesOfPhotosResponse.hashesOfPhotos
+                return data
+            })
+        }
+        if (file !== null) {
+            const formData2 = new FormData()
+            formData2.append("rentalTermsAndConditions", file, "rentalTermsAndConditions.pdf")
 
-        const formData2 = new FormData()
-        formData2.append("rentalTermsAndConditions", file, "rentalTermsAndConditions.pdf")
+            const hashOfRentalTermsAndConditionsResponse = await fetch("/api/upload-terms-and-conditions", {
+                method: "POST",
+                body: formData2,
+                contentType: "multipart/form-data",
+            }).then((response) => response.json())
 
-        const hashOfRentalTermsAndConditionsResponse = await fetch("/api/upload-terms-and-conditions", {
-            method: "POST",
-            body: formData2,
-            contentType: "multipart/form-data",
-        }).then((response) => response.json())
+            console.log("hashOfRentalTermsAndConditions Response: ", hashOfRentalTermsAndConditionsResponse)
+            console.log("hashOfRentalTermsAndConditions Response 2:  ", hashOfRentalTermsAndConditionsResponse.hash)
 
-        console.log("hashOfRentalTermsAndConditions Response: ", hashOfRentalTermsAndConditionsResponse)
-        console.log("hashOfRentalTermsAndConditions Response 2:  ", hashOfRentalTermsAndConditionsResponse.hash)
-
-        setListPropertyData((data) => {
-            data.hashOfRentalAggreement = hashOfRentalTermsAndConditionsResponse.hash
-            return data
-        })
-
+            setListPropertyData((data) => {
+                data.hashOfRentalAggreement = hashOfRentalTermsAndConditionsResponse.hash
+                return data
+            })
+        }
         await listProperty(
             listPropertyData.description,
             selectedProperty.propertyNftId,
@@ -183,7 +208,7 @@ export default function listProperty() {
     return (
         <ListProperty
             {...{
-                properties,
+                selectedProperty,
                 alert,
                 loading,
                 listPropertyData,

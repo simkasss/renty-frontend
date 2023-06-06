@@ -17,7 +17,15 @@ const connectWallet = async () => {
 }
 
 export function HeaderContainer() {
-    const { wallet } = useSelector((states) => states.globalStates)
+    const { conversionChecked, wallet } = useSelector((states) => states.globalStates)
+    const { setConversionChecked } = globalActions
 
-    return wallet ? <ConnectedHeader wallet={wallet} /> : <GuestHeader connectWallet={connectWallet} />
+    const handleConversionChecked = () => {
+        store.dispatch(setConversionChecked(!conversionChecked))
+    }
+    return wallet ? (
+        <ConnectedHeader wallet={wallet} conversionChecked={conversionChecked} handleConversionChecked={handleConversionChecked} />
+    ) : (
+        <GuestHeader connectWallet={connectWallet} conversionChecked={conversionChecked} handleConversionChecked={handleConversionChecked} />
+    )
 }

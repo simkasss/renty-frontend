@@ -6,19 +6,13 @@ import React from "react"
 import { ethers } from "ethers"
 import networkMapping from "../../../constants/networkMapping.json"
 import mainContractAbi from "../../../constants/MainContract.json"
-import Switch from "@mui/material/Switch"
-import Typography from "@mui/material/Typography"
-import Stack from "@mui/material/Stack"
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import { useSelector } from "react-redux"
 
 export default function Property({ listedProperties }) {
     const router = useRouter()
     const { propertyId: id } = router.query
     const [showContactDetails, setShowContactDetails] = React.useState(false)
-    const [conversionChecked, setConversionChecked] = React.useState(true)
-    const handleChange = () => {
-        setConversionChecked(!conversionChecked)
-    }
+    const { conversionChecked } = useSelector((states) => states.globalStates)
 
     const [email, setEmail] = React.useState("")
     const [phoneNumber, setPhoneNumber] = React.useState("")
@@ -82,12 +76,6 @@ export default function Property({ listedProperties }) {
 
     return (
         <>
-            {" "}
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
             <PropertyDetails
                 property={selectedProperty}
                 setShowContactDetails={setShowContactDetails}

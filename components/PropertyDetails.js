@@ -17,6 +17,7 @@ import ImageList from "@mui/material/ImageList"
 import ImageListItem from "@mui/material/ImageListItem"
 import CreateIcon from "@mui/icons-material/Create"
 import SendIcon from "@mui/icons-material/Send"
+import { getWEIAmountInUSD } from "../utilities/currencyConversion"
 
 function srcset(image, size, rows = 1, cols = 1) {
     return {
@@ -49,26 +50,15 @@ export function PropertyDetails({ property, setShowContactDetails, showContactDe
                 })
                 .catch((error) => console.error(error))
         }
-        async function getWEIAmountInUSD(ethAmount) {
-            if (typeof window !== "undefined") {
-                ethereum = window.ethereum
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const mainContractAddress = networkMapping["11155111"].MainContract[0]
-                const contractAbi = mainContractAbi
-                const contract = new ethers.Contract(mainContractAddress, contractAbi, provider)
-                const amountInWei = ethers.BigNumber.from(ethers.utils.parseUnits(ethAmount, 18))
-                console.log("amountInWei: ", Number(amountInWei))
-                const amountInUsd = await contract.getWEIAmountInUSD(amountInWei)
-                console.log("amount in usd: ", Number(amountInUsd))
-
-                return amountInUsd
-            }
+        async function currencyConversion(ethAmount) {
+            const usd = await getWEIAmountInUSD(ethAmount)
+            return usd
         }
 
         getPropertyData()
         console.log("property:  ", property)
-        getWEIAmountInUSD(property.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
-        getWEIAmountInUSD(property.depositAmount).then((usd) => setDepositInUsd(usd))
+        currencyConversion(property.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
+        currencyConversion(property.depositAmount).then((usd) => setDepositInUsd(usd))
     }, [])
 
     return (
@@ -112,7 +102,7 @@ export function PropertyDetails({ property, setShowContactDetails, showContactDe
                                 {address}
                             </Typography>
                             <Typography variant="inherit" component="div" color="primary">
-                                {conversionChecked ? `${property.rentalPrice} ETH/month` : `${rentalPriceInUsd} USD/month`}
+                                {conversionChecked ? `${rentalPriceInUsd} USD/month` : `${property.rentalPrice} ETH/month`}
                             </Typography>
 
                             <Button
@@ -175,7 +165,7 @@ export function PropertyDetails({ property, setShowContactDetails, showContactDe
                                                 Deposit Amount
                                             </TableCell>
                                             <TableCell align="left">
-                                                {conversionChecked ? `${property.depositAmount} ETH` : `${depositInUsd} USD`}
+                                                {conversionChecked ? `${depositInUsd} USD` : `${property.depositAmount} ETH`}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>

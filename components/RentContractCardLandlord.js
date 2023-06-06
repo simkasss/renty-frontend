@@ -10,9 +10,7 @@ import TableCell from "@mui/material/TableCell"
 import TableContainer from "@mui/material/TableContainer"
 import TableRow from "@mui/material/TableRow"
 import Paper from "@mui/material/Paper"
-import Switch from "@mui/material/Switch"
 import Head from "next/head"
-import Stack from "@mui/material/Stack"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import AnnouncementIcon from "@mui/icons-material/Announcement"
 import NotInterestedIcon from "@mui/icons-material/NotInterested"
@@ -25,6 +23,7 @@ import { Payment } from "./Payment"
 import Grid from "@mui/material/Grid"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 import SendIcon from "@mui/icons-material/Send"
+import { getWEIAmountInUSD } from "../utilities/currencyConversion"
 
 function convertTimestampToDate(timestampInSeconds) {
     const date = new Date(timestampInSeconds * 1000)
@@ -65,13 +64,8 @@ export function RentContractCardLandlord({
     depositTransfered,
     totalRentPaid,
     totalRequiredRentAmount,
-    handleChange,
+
     conversionChecked,
-    rentalPriceInUsd,
-    depositInUsd,
-    transferedDepositInUsd,
-    totalRentPaidInUsd,
-    totalRequiredInUsd,
 }) {
     const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
     let status
@@ -84,17 +78,34 @@ export function RentContractCardLandlord({
     } else if (rentContract.expiryTimestamp < nowTimestampInSeconds) {
         status = "Completed"
     }
+    const [rentalPriceInUsd, setRentalPriceInUsd] = React.useState("")
+    const [depositInUsd, setDepositInUsd] = React.useState("")
+    const [transferedDepositInUsd, setTransferedDepositInUsd] = React.useState("")
+    const [totalRentPaidInUsd, setTotalRentPaidInUsd] = React.useState("")
+    const [totalRequiredInUsd, setTotalRequiredInUsd] = React.useState("")
 
+    React.useEffect(() => {
+        if (!rentContract) {
+            return
+        }
+        async function currencyConversion(ethAmount) {
+            const usd = await getWEIAmountInUSD(ethAmount)
+            return usd
+        }
+        currencyConversion(rentContract.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
+        currencyConversion(rentContract.depositAmount).then((usd) => setDepositInUsd(usd))
+        currencyConversion(depositTransfered.toString()).then((usd) => setTransferedDepositInUsd(usd))
+        currencyConversion(totalRentPaid.toString()).then((usd) => setTotalRentPaidInUsd(usd))
+        if (totalRequiredRentAmount > 0) {
+            currencyConversion(totalRequiredRentAmount.toString()).then((usd) => setTotalRequiredInUsd(usd))
+        }
+    }, [rentContract, depositTransfered, totalRentPaid, totalRequiredRentAmount])
     return (
         <>
             <Head>
                 <title>Rent Contract</title>
             </Head>
-            <Stack direction="row" alignItems="center" sx={{ ml: 12, mt: 1 }}>
-                <AttachMoneyIcon fontSize="small" />
-                <Switch checked={conversionChecked} onClick={handleChange} />
-                <Typography>ETH</Typography>
-            </Stack>
+
             <Box
                 component="form"
                 sx={{
@@ -114,7 +125,7 @@ export function RentContractCardLandlord({
                             <br />
 
                             <Typography variant="inherit" component="div" color="primary">
-                                {conversionChecked ? `${rentContract.rentalPrice} ETH/month` : `${rentalPriceInUsd} USD/month`}
+                                {conversionChecked ? `${rentalPriceInUsd} USD/month` : `${rentContract.rentalPrice} ETH/month`}
                             </Typography>
 
                             <br />
@@ -145,7 +156,7 @@ export function RentContractCardLandlord({
                                                 Deposit Amount
                                             </TableCell>
                                             <TableCell align="left">
-                                                {conversionChecked ? `${rentContract.depositAmount} ETH` : `${depositInUsd} USD`}
+                                                {conversionChecked ? `${depositInUsd} USD` : `${rentContract.depositAmount} ETH`}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -171,7 +182,7 @@ export function RentContractCardLandlord({
                                                 Transfered Deposit
                                             </TableCell>
                                             <TableCell align="left">
-                                                {conversionChecked ? `${depositTransfered} ETH` : `${transferedDepositInUsd} USD`}
+                                                {conversionChecked ? `${transferedDepositInUsd} USD` : `${depositTransfered} ETH`}
 
                                                 {depositTransfered < rentContract.depositAmount ? (
                                                     <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />
@@ -185,7 +196,7 @@ export function RentContractCardLandlord({
                                                 Total Paid Rent
                                             </TableCell>
                                             <TableCell align="left">
-                                                {conversionChecked ? `${totalRentPaid} ETH` : `${totalRentPaidInUsd} USD`}
+                                                {conversionChecked ? `${totalRentPaidInUsd} USD` : `${totalRentPaid} ETH`}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -196,20 +207,14 @@ export function RentContractCardLandlord({
                                                 {totalRequiredRentAmount < 0
                                                     ? "0"
                                                     : conversionChecked
-                                                    ? `${totalRequiredRentAmount} ETH`
-                                                    : `${totalRequiredInUsd} USD`}
+                                                    ? `${totalRequiredInUsd} USD`
+                                                    : `${totalRequiredRentAmount} ETH`}
                                                 {totalRequiredRentAmount > totalRentPaid ? (
                                                     <ErrorOutlineIcon color="error" sx={{ ml: 1 }} />
                                                 ) : (
                                                     <CheckIcon color="success" sx={{ ml: 1 }} />
                                                 )}
                                             </TableCell>
-                                        </TableRow>
-                                        <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                                            <TableCell component="th" scope="row">
-                                                Release Of Deposit
-                                            </TableCell>
-                                            <TableCell align="left">{depositReleasePermission == false ? "Not allowed" : "Allowed"}</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
@@ -271,7 +276,7 @@ export function RentContractCardLandlord({
                                             <Button variant="outlined" endIcon={<NotInterestedIcon />} sx={{ mr: 1 }} onClick={terminateRentContract}>
                                                 Terminate Rent Contract
                                             </Button>
-                                            {terminateLoading ? <CircularProgress size="2rem" /> : <></>}
+                                            {terminateLoading ? <CircularProgress size="1rem" sx={{ ml: 1 }} /> : <></>}
                                         </>
                                     ) : (
                                         <Alert icon={<CheckIcon fontSize="inherit" />}>Contract is terminated!</Alert>
@@ -346,9 +351,9 @@ export function RentContractCardLandlord({
                                                 <></>
                                             )}
 
-                                            {!solvedAlert && solvedLoading ? <CircularProgress size="2rem" /> : <></>}
+                                            {!solvedAlert && solvedLoading ? <CircularProgress size="1rem" sx={{ ml: 1 }} /> : <></>}
 
-                                            {solvedAlert ? <Alert icon={<CheckIcon fontSize="inherit" />}>Dispute is created!</Alert> : <></>}
+                                            {solvedAlert ? <Alert icon={<CheckIcon fontSize="inherit" />}>Dispute is solved!</Alert> : <></>}
                                             <Grid container spacing={{ xs: 4, md: 4 }} columns={{ xs: 4, sm: 8, md: 24 }}>
                                                 {disputes.map((dispute) => (
                                                     <Grid item xs={2} sm={5} md={8}>
