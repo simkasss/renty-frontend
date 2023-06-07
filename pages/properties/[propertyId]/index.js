@@ -16,13 +16,9 @@ export default function Property({ listedProperties }) {
 
     const [email, setEmail] = React.useState("")
     const [phoneNumber, setPhoneNumber] = React.useState("")
-    // Find the selected property from the properties array using the id parameter.
     const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
     console.log(selectedProperty)
-    // If the selected property is not found, show a message.
-    if (!selectedProperty) {
-        return <div>Property not found</div>
-    }
+
     React.useEffect(() => {
         if (typeof window == "undefined") {
             return

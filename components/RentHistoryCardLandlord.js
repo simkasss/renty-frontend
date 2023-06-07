@@ -217,7 +217,7 @@ export function RentHistoryCardLandlord({
                                     </Typography>
                                     <Grid container spacing={{ xs: 4, md: 4 }} columns={{ xs: 4, sm: 8, md: 10 }}>
                                         {payments.map((payment) => (
-                                            <Grid item xs={2} sm={5} md={8}>
+                                            <Grid item xs={2} sm={5} md={8} key={payment.id}>
                                                 <Payment key={payment.id} payment={payment} />
                                             </Grid>
                                         ))}

@@ -10,7 +10,7 @@ import { structureProperties } from "../../../../utilities/structureStructs"
 import { UpdateProperty } from "../../../../components/UpdateProperty"
 import { useSelector } from "react-redux"
 
-export default function updateProperty() {
+export default function Update() {
     const router = useRouter()
     const { propertyId: id } = router.query
     const { wallet } = useSelector((states) => states.globalStates)

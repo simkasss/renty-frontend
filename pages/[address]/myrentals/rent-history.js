@@ -67,7 +67,7 @@ export default function RentHistory() {
             {rentHistory.length != 0 ? (
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {rentHistory.map((rentContract) => (
-                        <Grid item xs={2} sm={4} md={4}>
+                        <Grid item xs={2} sm={4} md={4} key={rentContract.id}>
                             <RentHistoryCardTenantContainer key={rentContract.id} rentContract={rentContract} />
                         </Grid>
                     ))}
@@ -75,7 +75,7 @@ export default function RentHistory() {
             ) : (
                 <>
                     <Typography gutterBottom variant="h6" component="div" sx={{ m: 1 }} color="primary">
-                        You haven't rented anything yet!
+                        You have not rented anything yet!
                     </Typography>
                 </>
             )}

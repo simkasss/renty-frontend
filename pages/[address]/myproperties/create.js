@@ -6,7 +6,7 @@ import networkMapping from "../../../constants/networkMapping.json"
 import mainContractAbi from "../../../constants/MainContract.json"
 import { CreateProperty } from "../../../components/CreateProperty"
 
-export default function createProperty() {
+export default function Create() {
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [propertyName, setPropertyName] = React.useState("")

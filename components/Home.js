@@ -66,7 +66,7 @@ export function Home() {
                 <NotInterestedIcon color="primary" /> and withdraw deposit <AttachMoneyIcon color="primary" /> after it is released via platform.
                 <br />
                 <br />
-                For more detailed instructions select "For Landlords" or "For Tenants" below.
+                For more detailed instructions select &quot;For Landlords&quot; or &quot;For Tenants&quot; below.
                 <br />
             </Typography>
             <Typography variant="body1" align="left" gutterBottom sx={{ mt: 2 }} color="primary">
@@ -81,18 +81,18 @@ export function Home() {
                 4. In order to create a property, click CREATE NEW PROPERTY. Fill in all the fields and submit a form. By submiting a form a property
                 is created and NFT for your property is automatically minted. <br />
                 5. After creating a property, it appears in Not Listed Properties section of My Properties <HomeIcon color="primary" /> page. Click
-                MORE DETAILS on property's card to get more information and access property actions. In this page you can review and update property
+                MORE DETAILS on property card to get more information and access property actions. In this page you can review and update property
                 details, list a property or review rent history. <br />
                 6. In order to list a property, click LIST PROPERTY. You have to fill in the rental price, deposit amount, the description, select
                 rental term, upload photos of your property and upload the Terms and Conditions document. <br />
                 After submiting, a property appears in main PROPERTIES page and in Listed Properties section of My Properties{" "}
                 <HomeIcon color="primary" /> page. <br />
-                7. When property is listed, tenants can apply for rent, and by clicking MORE DETAILS on your property's card you can screen rent
+                7. When property is listed, tenants can apply for rent, and by clicking MORE DETAILS on your property card you can screen rent
                 applications or remove property from list. <br />
                 You can select a rent application that is suitable for you and sign a rent contract. Tenant contact details{" "}
                 <SendIcon color="primary" /> are provided if there is a need to negotiate or adjust application before signing it.
                 <br />
-                8. When you sign a rent contract, you can access it in your property's page by clicking CURRENT RENT CONTRACT. <br />
+                8. When you sign a rent contract, you can access it in your property page by clicking CURRENT RENT CONTRACT. <br />
                 In this page you can review all the contract details, disputes <AnnouncementIcon color="primary" />, access tenant contact details{" "}
                 <SendIcon color="primary" />, or terminate rent contract <NotInterestedIcon color="primary" />. Tenant executes all the payments via
                 platform, so you can also review payment history <AttachMoneyIcon color="primary" />, After expiration date, the contract is
@@ -224,10 +224,10 @@ export function Home() {
                             <Typography variant="body2" align="left">
                                 To apply for a rental using the platform, tenants are required to mint a soulbound token, which cannot be transferred.
                                 Utilizing a soulbound token enhances the security of the rental agreement by providing a unique and non-fungible token
-                                that is tied exclusively to the tenant. Landlords have the ability to review the tenant's rental history, enabling
-                                them to assess the creditworthiness of potential tenants and make well-informed decisions regarding rental
-                                arrangements. Tenants, on the other hand, can utilize their rental history as evidence of their reliability as
-                                renters, potentially allowing them to negotiate more favorable rental terms in the future.
+                                that is tied exclusively to the tenant. Landlords have the ability to review the tenant rental history, enabling them
+                                to assess the creditworthiness of potential tenants and make well-informed decisions regarding rental arrangements.
+                                Tenants, on the other hand, can utilize their rental history as evidence of their reliability as renters, potentially
+                                allowing them to negotiate more favorable rental terms in the future.
                             </Typography>
                         </CardContent>
                     </Card>
@@ -240,10 +240,10 @@ export function Home() {
                                 <HomeIcon fontSize="large" sx={{ mr: 2, mb: 1 }} /> Property NFTs
                             </Typography>
                             <Typography variant="body2" align="left">
-                                When creating a property, a landlord mints an NFT which contains the owner's name, property address, and country code.
+                                When creating a property, a landlord mints an NFT which contains the owners name, property address, and country code.
                                 By minting an NFT for a property, an immutable record of ownership is created, and crucial information about the
                                 property is securely stored on a blockchain. This approach offers enhanced security and transparency. Furthermore, the
-                                blockchain also serves as a repository for the property's rent history, rent contract payments and disputes.
+                                blockchain also serves as a repository for the property rent history, rent contract payments and disputes.
                             </Typography>
                         </CardContent>
                     </Card>

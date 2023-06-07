@@ -8,7 +8,7 @@ import { AddContactDetails } from "../../components/AddContactDetails"
 import { Balance } from "../../components/Balance"
 import { useSelector } from "react-redux"
 
-export default function account() {
+export default function Account() {
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [email, setEmail] = React.useState("")

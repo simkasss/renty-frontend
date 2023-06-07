@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ethers } from "ethers"
 import React from "react"
 import networkMapping from "../../../../constants/networkMapping.json"
-import rentAppAbi from "../../../../constants/RentApp.json"
+import mainContractAbi from "../../../../constants/MainContract.json"
 import { structurePayments } from "../../../../utilities/structureStructs"
 import { useRouter } from "next/router"
 
@@ -19,9 +19,9 @@ export default function PaymentHistory() {
                     ethereum = window.ethereum
                     const provider = new ethers.providers.Web3Provider(ethereum)
                     const signer = provider.getSigner()
-                    const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                    const contractAbi = rentAppAbi
-                    const contract = new ethers.Contract(rentAppAddress, contractAbi, signer)
+                    const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                    const contractAbi = mainContractAbi
+                    const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                     const paymentHistory = structurePayments(await contract.getRentContractPaymentHistory(rentContractId))
                     console.log(`Payment History: ${paymentHistory}`)
                     return paymentHistory
