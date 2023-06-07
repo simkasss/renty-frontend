@@ -1,96 +1,57 @@
 import React from "react"
-import Link from "next/link"
-import { useRouter } from "next/router"
+import Card from "@mui/material/Card"
+import CardActions from "@mui/material/CardActions"
+import CardContent from "@mui/material/CardContent"
+import CardMedia from "@mui/material/CardMedia"
+import Button from "@mui/material/Button"
+import Typography from "@mui/material/Typography"
+import { getWEIAmountInUSD } from "../utilities/currencyConversion"
 
-export function PropertyCard({ id, name, rentalPrice, rentalTerm, onClick }) {
+export function PropertyCard({ name, rentalPrice, rentalTerm, hashesOfPhotos, hashOfMetaData, onClick, conversionChecked }) {
+    const [address, setAddress] = React.useState("")
+    const [rentalPriceInUsd, setRentalPriceInUsd] = React.useState("")
+    React.useEffect(() => {
+        async function getPropertyData() {
+            const url = `https://gateway.pinata.cloud/ipfs/${hashOfMetaData}`
+            await fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data)
+
+                    setAddress(data.address)
+                })
+                .catch((error) => console.error(error))
+        }
+        async function currencyConversion(ethAmount) {
+            const usd = await getWEIAmountInUSD(ethAmount)
+            setRentalPriceInUsd(usd)
+        }
+        getPropertyData()
+        currencyConversion(rentalPrice)
+    }, [])
+
     return (
         <>
-            <Link href={`/properties/${id}`}>
-                <div className="property-card" role="button" tabIndex={0} onClick={onClick}>
-                    {/* <img src={imageSrc} alt="Property" /> */}
-                    <div className="property-details">
-                        <div className="property-rental-price">{name}</div>
-                        <div className="property-rental-price">{rentalPrice} ETH</div>
-                        <div className="property-available-start-date">Rental Term: {rentalTerm / 60 / 60 / 24} days </div>
-                    </div>
-                </div>
-            </Link>
+            <Card sx={{ maxWidth: 345 }} onClick={onClick}>
+                <CardMedia sx={{ height: 200 }} image={`https://gateway.pinata.cloud/ipfs/${hashesOfPhotos[0]}`} title="flat" />
+                <CardContent>
+                    <Typography gutterBottom variant="h6" component="div">
+                        {name}
+                    </Typography>
+                    <Typography variant="body1" component="div" color="primary">
+                        {conversionChecked ? `${rentalPriceInUsd} USD/month` : `${rentalPrice} ETH/month`}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {address}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Rental Term: {rentalTerm / 60 / 60 / 24} days
+                    </Typography>
+                </CardContent>
+                <CardActions>
+                    <Button size="small">More details</Button>
+                </CardActions>
+            </Card>
         </>
-    )
-}
-
-export function PropertyDetails({ property, onBack }) {
-    const [numberOfRooms, setNumberOfRooms] = React.useState("")
-    const [area, setArea] = React.useState("")
-    const [floor, setFloor] = React.useState("")
-    const [buildYear, setBuildYear] = React.useState("")
-
-    async function getPropertyData() {
-        const url = `https://gateway.pinata.cloud/ipfs/${property.hashOfMetaData}`
-        await fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data)
-                setNumberOfRooms(data.numberOfRooms)
-                setArea(data.area)
-                setFloor(data.floor)
-                setBuildYear(data.buildYear)
-            })
-            .catch((error) => console.error(error))
-    }
-    getPropertyData()
-    const router = useRouter()
-
-    const handleApplyClick = () => {
-        router.push(`/properties/${property.propertyNftId}/apply-for-rent`)
-    }
-
-    return (
-        <div className="property-details">
-            <button className="button-standart" onClick={handleApplyClick}>
-                Apply for Rent
-            </button>
-            <div className="property-info">
-                <h2>{`${property.name}`}</h2>
-                <p className="standartbolded">Rental Price </p>
-                <p>${property.rentalPrice} ETH/month</p>
-                <p className="standartbolded">Deposit:</p>
-                <p>{property.depositAmount} ETH</p>
-                <p className="standartbolded">Rental Term:</p>
-                <p>{property.rentalTerm / 60 / 60 / 24} days</p>
-                <p className="standartbolded">Number of rooms:</p>
-                <p>{numberOfRooms}</p>
-                <p className="standartbolded">Area:</p>
-                <p>{area}</p>
-                <p className="standartbolded">Floor:</p>
-                <p>{floor}</p>
-                <p className="standartbolded">Build Year:</p>
-                <p>{buildYear}</p>
-                <p className="standartbolded">Description:</p>
-                <p>{property.description}</p>
-                <p className="standartbolded">Property NFT id:</p>
-                <p>{property.propertyNftId}</p>
-                <p className="standartbolded">Hash of Terms and Conditions:</p>
-                <p>{property.hashOfRentalAgreement}</p>
-                <div className="review-section">
-                    <div className="title">Reviews:</div>
-                    <div className="review-card">
-                        <div className="author">John Doe</div>
-                        <p>Some review of past tenant.</p>
-
-                        <div className="date">May 1, 2023</div>
-                    </div>
-                    <div className="review-card">
-                        <div className="author">Ben Hoe</div>
-                        <p>Some review of past tenant.</p>
-
-                        <div className="date">April 1, 2023</div>
-                    </div>
-                </div>
-            </div>
-            <button className="back-button" onClick={onBack}>
-                Back
-            </button>
-        </div>
     )
 }

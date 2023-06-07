@@ -34,7 +34,7 @@ export const structureRentContracts = (contracts) =>
 export const structurePayments = (payments) =>
     payments.map((payment) => ({
         id: Number(payment.id),
-        name: payment.name,
+
         timestamp: Number(payment.timestamp),
         amount: Number(payment.amount),
     }))

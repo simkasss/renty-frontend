@@ -1,12 +1,11 @@
 import Router from "next/router"
 import React from "react"
-import { MyPropertyDetails } from "@/components/MyPropertyCard"
+import { MyPropertyDetails } from "@/components/MyPropertyDetails"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
-import Link from "next/link"
 import { useSelector } from "react-redux"
 import networkMapping from "../../../../constants/networkMapping.json"
-import rentAppAbi from "../../../../constants/RentApp.json"
+import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
 
 export default function Property() {
@@ -14,6 +13,9 @@ export default function Property() {
     const { propertyId: id } = router.query
     const [properties, setProperties] = React.useState([])
     const { wallet } = useSelector((states) => states.globalStates)
+    const [alert, setAlert] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
+    const { conversionChecked } = useSelector((states) => states.globalStates)
 
     React.useEffect(() => {
         async function getUserProperties() {
@@ -22,9 +24,9 @@ export default function Property() {
                 const provider = new ethers.providers.Web3Provider(ethereum)
                 const signer = provider.getSigner()
                 const userAddress = await signer.getAddress()
-                const rentAppAddress = networkMapping["11155111"].RentApp[0]
-                const contractAbi = rentAppAbi
-                const contract = new ethers.Contract(rentAppAddress, contractAbi, provider)
+                const mainContractAddress = networkMapping["11155111"].MainContract[0]
+                const contractAbi = mainContractAbi
+                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
 
                 const [listedPropertiesResponse, userPropertiesResponse] = await Promise.all([
                     contract.getListedProperties(),
@@ -57,29 +59,39 @@ export default function Property() {
         return <div>Property not found</div>
     }
     console.log(property)
+    const handleLinkClick = (path) => {
+        router.push(path)
+    }
+
+    const handleUnlist = async () => {
+        setLoading(true)
+        if (typeof window !== "undefined") {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contractAbi = mainContractAbi
+            const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+            const unlinst = await contract.removePropertyFromList(id)
+            await unlinst.wait()
+            setAlert(true)
+            router.push(`/${wallet}/myproperties`)
+        }
+    }
 
     return (
         <>
-            <Link className="button-standart" href={`/${wallet}/properties/${id}/rent-history`}>
-                Rent History
-            </Link>
-            {!property.isListed ? (
-                <Link className="button-standart" href={`/${wallet}/properties/${id}/list`}>
-                    List property
-                </Link>
-            ) : (
-                <Link className="button-standart" href={`/${wallet}/properties/${id}/rent-applications`}>
-                    Screen Rent Applications
-                </Link>
-            )}
-            {property.isRented ? (
-                <Link className="button-standart" href={`/${wallet}/properties/${id}/rent-contract`}>
-                    Current Rent Contract
-                </Link>
-            ) : (
-                <></>
-            )}
-            <MyPropertyDetails key={property.propertyNftId} property={property} />
+            <MyPropertyDetails
+                key={property.propertyNftId}
+                property={property}
+                wallet={wallet}
+                id={id}
+                handleLinkClick={handleLinkClick}
+                handleUnlist={handleUnlist}
+                alert={alert}
+                loading={loading}
+                conversionChecked={conversionChecked}
+            />
         </>
     )
 }

@@ -1,12 +1,10 @@
-import propertyNftAbi from "./PropertyNft.json"
-import tenantSoulboundTokenAbi from "./TenantSoulboundToken.json"
-import rentAppAbi from "./RentApp.json"
+import mainContractAbi from "./MainContract.json"
 import networkMapping from "./networkMapping.json"
-export const rentAppAddress = networkMapping["11155111"].RentApp[0]
 import { store } from "../store"
 import { ethers } from "ethers"
 import { globalActions } from "../store/globalSlices"
 import { structureProperties } from "../utilities/structureStructs"
+export const mainContractAddress = networkMapping["11155111"].MainContract[0]
 
 const { setWallet } = globalActions
 let tx, ethereum
@@ -19,7 +17,7 @@ const serversideEthereumContract = async () => {
     const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_APP_RPC_URL)
     const wallet = ethers.Wallet.createRandom()
     const signer = provider.getSigner(wallet.address)
-    const contract = new ethers.Contract(rentAppAddress, rentAppAbi, signer)
+    const contract = new ethers.Contract(mainContractAddress, mainContractAbi, signer)
     return contract
 }
 
@@ -29,27 +27,6 @@ const getListedProperties = async () => {
     return structureProperties(listedProperties)
 }
 
-const connectWallet = async () => {
-    try {
-        if (!ethereum) return reportError("Please install Metamask")
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" })
-        store.dispatch(setWallet(accounts[0]))
-    } catch (error) {
-        reportError(error)
-    }
-}
-
-const truncate = (text, startChars, endChars, maxLength) => {
-    if (text.length > maxLength) {
-        let start = text.substring(0, startChars)
-        let end = text.substring(text.length - endChars, text.length)
-        while (start.length + end.length < maxLength) {
-            start = start + "."
-        }
-        return start + end
-    }
-    return text
-}
 const monitorWalletConnection = async () => {
     try {
         if (!ethereum) return reportError("Install Metamask")
@@ -75,4 +52,4 @@ const monitorWalletConnection = async () => {
     }
 }
 
-export { connectWallet, truncate, monitorWalletConnection, getListedProperties }
+export { monitorWalletConnection, getListedProperties }

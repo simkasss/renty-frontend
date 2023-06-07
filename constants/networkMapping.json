@@ -1,1 +1,12 @@
-{ "31337": { "RentApp": ["0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"] }, "11155111": { "RentApp": ["0xC5d0805E1ea1AED69fDB20786A210A2321D62127"] } }
+{
+    "31337": {
+        "MainContract": ["0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"],
+        "TenantManager": ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"],
+        "TransfersAndDisputes": ["0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"]
+    },
+    "11155111": {
+        "MainContract": ["0x6a47836fB33E46631028eC352715fc358AF4E2f0"],
+        "TenantManager": ["0x438bcf38699dc024fDCcc0B7A06B1e1968DFa2d4"],
+        "TransfersAndDisputes": ["0xA6037530b5BAaf9108CE9D8309a2e8De8D976914"]
+    }
+}

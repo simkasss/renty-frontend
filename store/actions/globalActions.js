@@ -8,4 +8,7 @@ export const globalActions = {
     setUserProperties: (state, action) => {
         state.userProperties = action.payload
     },
+    setConversionChecked: (state, action) => {
+        state.conversionChecked = !state.conversionChecked
+    },
 }
