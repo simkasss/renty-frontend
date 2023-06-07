@@ -1,4 +1,3 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
@@ -14,25 +13,22 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+The backend repo: **https://github.com/simkasss/renty-backend**
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Inspiration
+The traditional real estate rental market faces a lack of transparency and security, rental processes are lengthy and complex, global accessibility is usually limited, disputes and fraudulent activities are persistent issues. Decentralized real estate rental platform Renty eliminates or reduces these issues, **making renting more transparent, convenient, and efficient** for both tenants and landlords.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## What it does
+Renty is a decentralized real estate rental platform, that offers full rental management for tenants and landlords - from searching for a property to signing and managing rent contracts. After connecting using Metamask, landlords can create a property - meantime a property NFT is automatically minted. Landlords can list properties for rent, screen rent applications, review applying tenants' rent history, sign rent contracts, and manage them via the platform. Tenants can search for rental properties, review property data and rental terms, and after connecting and creating tenant soulbound token, tenants can apply for rent. After the landlord accepts a rent application - a rent contract is automatically signed. Main rental processes are executed using a platform - transferring and releasing deposit, paying rent, terminating rent contracts, managing disputes, withdrawing proceeds and so on. All of these processes are tracked and stored on the blockchain and both tenant and landlord can review payment history, rent contract disputes, see each other contact details, and other main rent contract information. 
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## How I built it
+The backend of the platform is built using **Solidity** and **Hardhat** and the frontend is built using **React** and **Next.js**. User Interface is built using **Material UI**.
+There are four smart contracts: 
+**TenantManager.sol** for minting Tenant Soulbound Tokens for each tenant;
+**PropertyNft.sol** for minting NFTs for each created property;
+**TransfersAndDisputes.sol** for managing all platform transactions and disputes of rent contracts;
+**MainContract.sol** for creating and managing properties, rent applications, rent contracts and interacting with other contracts;
+Property NFTs are stored on **NFT.Storage**.  Soulbound Tokens, property metadata, photos, and terms and conditions document are stored on **IPFS** and pinned using **PINATA**. 
+For converting ETH/USD **Chainlink Data Feeds** are used.
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
