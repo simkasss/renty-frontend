@@ -1,3 +1,4 @@
+The backend repo: **https://github.com/simkasss/renty-backend**
 
 ## Getting Started
 
@@ -12,8 +13,6 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-The backend repo: **https://github.com/simkasss/renty-backend**
 
 ## Inspiration
 The traditional real estate rental market faces a lack of transparency and security, rental processes are lengthy and complex, global accessibility is usually limited, disputes and fraudulent activities are persistent issues. Decentralized real estate rental platform Renty eliminates or reduces these issues, **making renting more transparent, convenient, and efficient** for both tenants and landlords.
