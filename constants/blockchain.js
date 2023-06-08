@@ -9,10 +9,6 @@ export const mainContractAddress = networkMapping["11155111"].MainContract[0]
 const { setWallet } = globalActions
 let tx, ethereum
 
-if (typeof window !== "undefined") {
-    ethereum = window.ethereum
-}
-
 const serversideEthereumContract = async () => {
     const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_APP_RPC_URL)
     const wallet = ethers.Wallet.createRandom()
