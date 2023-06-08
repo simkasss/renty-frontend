@@ -27,19 +27,19 @@ export default function ApplyForRent() {
     })
 
     React.useEffect(() => {
+        if (typeof window === "undefined") return
+
         async function getContract() {
-            if (typeof window !== "undefined") {
-                try {
-                    ethereum = window.ethereum
-                    const provider = new ethers.providers.Web3Provider(ethereum)
-                    const signer = provider.getSigner()
-                    const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
-                    const contractAbi = tenantManagerAbi
-                    const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
-                    return contract
-                } catch (e) {
-                    console.log(e)
-                }
+            try {
+                ethereum = window.ethereum
+                const provider = new ethers.providers.Web3Provider(ethereum)
+                const signer = provider.getSigner()
+                const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
+                const contractAbi = tenantManagerAbi
+                const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
+                return contract
+            } catch (e) {
+                console.log(e)
             }
         }
 
