@@ -7,7 +7,6 @@ require("dotenv").config()
 
 export default async function handler(req, res) {
     const propertyData = JSON.parse(req.body)
-    console.log("propertyData", propertyData)
     const propertyDataHash = await uploadPropertyDataToIPFS(propertyData)
     res.status(201).json({ propertyDataHash })
 }
@@ -22,12 +21,10 @@ async function uploadPropertyDataToIPFS(propertyData) {
         buildYear: propertyData.buildYear,
     }
 
-    console.log(`Uploading metadata...`)
     const metadataUploadResponse = await storeMetadata(metadata)
-    console.log("response", metadataUploadResponse)
     const dataHash = metadataUploadResponse.IpfsHash
 
-    console.log("uploaded data hash: ", dataHash)
+    console.log("Uploaded data hash: ", dataHash)
 
     return dataHash
 }

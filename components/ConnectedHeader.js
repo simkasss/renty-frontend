@@ -19,7 +19,6 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 
 export function ConnectedHeader({ wallet, conversionChecked, handleConversionChecked }) {
     const [anchorEl, setAnchorEl] = React.useState(null)
-    console.log("conversionChecked", conversionChecked)
 
     const router = useRouter()
     const handleMenuOpen = (event) => {
@@ -50,10 +49,10 @@ export function ConnectedHeader({ wallet, conversionChecked, handleConversionChe
                         sx={{
                             "& .MuiSwitch-thumb": { bgcolor: "white" },
                             "& .MuiSwitch-track": {
-                                bgcolor: conversionChecked ? "lightGreen" : "white", // Change the track color here
+                                bgcolor: conversionChecked ? "lightGreen" : "white",
                             },
                             "& .MuiSwitch-root": {
-                                bgcolor: "white", // Change the background color here
+                                bgcolor: "white",
                             },
                         }}
                     />

@@ -58,18 +58,14 @@ export default function RentContract() {
             const signer = provider.getSigner()
             const userAddress = await signer.getAddress()
             const userProperties = structureProperties(await contract.getUserProperties(userAddress))
-            console.log(userProperties)
             const property = userProperties.filter((property) => property.propertyNftId == propertyId)[0]
-            console.log(property)
             const rentContractId = property.rentContractId
             const rentContract = structureRentContract(await contract.getRentContract(rentContractId))
-            console.log(rentContract)
             return rentContract
         }
 
         async function getProperty(contract) {
             const property = structureProperty(await contract.getProperty(propertyId))
-            console.log("Property", property)
             return property
         }
         async function getDisputes(rentContractId) {
@@ -80,7 +76,6 @@ export default function RentContract() {
             const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, provider)
             const disputes = await contract.getRentContractDisputes(rentContractId)
             const structuredDisputes = structureDisputes(disputes)
-            console.log("disputes: ", structuredDisputes)
             return structuredDisputes
         }
         async function getTenantAddress(rentContract) {
@@ -103,7 +98,6 @@ export default function RentContract() {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(tenant)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(tenant) {
@@ -114,7 +108,6 @@ export default function RentContract() {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(tenant)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
 
@@ -125,7 +118,7 @@ export default function RentContract() {
             const transfersAndDisputesAddress = networkMapping["11155111"].TransfersAndDisputes[0]
             const contractAbi = transfersAndDisputesAbi
             const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
-            console.log("rentContract.propertyNftId", rentContract.propertyNftId)
+            console.log("RentContract.propertyNftId", rentContract.propertyNftId)
             const transferedDepositAmount = await contract.getDeposit(rentContract.id)
             console.log("Transfered Deposit Amount: ", ethers.utils.formatEther(transferedDepositAmount))
             return ethers.utils.formatEther(transferedDepositAmount)
@@ -182,7 +175,6 @@ export default function RentContract() {
         const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, provider)
 
         const payments = structurePayments(await contract.getRentContractPaymentHistory(rentContract.id))
-        console.log(payments)
         setPayments(payments)
 
         return payments
@@ -201,7 +193,6 @@ export default function RentContract() {
         const createDispute = await contract.createDispute(rentContract.id, disputeDescription)
         await createDispute.wait()
         setAlert(true)
-        console.log("dispute", disputeDescription)
     }
     async function solveDispute(disputeId) {
         setSolvedLoading(true)
@@ -213,7 +204,6 @@ export default function RentContract() {
         const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
         const solveDispute = await contract.solveDispute(rentContract.id, disputeId)
         await solveDispute.wait()
-        console.log("solved")
         setSolvedAlert(true)
     }
     async function terminateRentContract() {

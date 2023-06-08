@@ -61,7 +61,6 @@ export function RentApplicationCard({ rentContract, nowTimestampInSeconds, handl
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(tenant)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(tenant) {
@@ -72,7 +71,6 @@ export function RentApplicationCard({ rentContract, nowTimestampInSeconds, handl
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(tenant)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
 
@@ -92,7 +90,6 @@ export function RentApplicationCard({ rentContract, nowTimestampInSeconds, handl
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                 const rentHistory = structureRentContracts(await contract.getTenantRentHistory(tokenId))
-                console.log(rentHistory)
                 setTenantRentHistory(rentHistory)
             } catch (e) {
                 console.log(e)

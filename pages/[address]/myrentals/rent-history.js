@@ -44,7 +44,6 @@ export default function RentHistory() {
                     const contractAbi = mainContractAbi
                     const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                     const rentHistory = structureRentContracts(await contract.getTenantRentHistory(tokenId))
-                    console.log(rentHistory)
                     return rentHistory
                 } catch (e) {
                     console.log(e)

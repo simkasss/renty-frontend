@@ -18,7 +18,6 @@ export const RentAppProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount] = useState("")
 
     const mintNft = async (_tokenURI) => {
-        console.log("minting property Nft..")
         const tokenURI = _tokenURI
         const web3Modal = new Web3Modal()
         const connection = await web3Modal.connect()
@@ -26,7 +25,6 @@ export const RentAppProvider = ({ children }) => {
         const signer = provider.getSigner()
         const contract = fetchContract(signer)
 
-        console.log(currentAccount)
         try {
             const transaction = await contract.mintPropertyNFT(tokenURI)
             await transaction.wait()

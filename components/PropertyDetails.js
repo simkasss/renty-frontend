@@ -41,7 +41,6 @@ export function PropertyDetails({ property, setShowContactDetails, showContactDe
             await fetch(url)
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data)
                     setAddress(data.address)
                     setNumberOfRooms(data.numberOfRooms)
                     setArea(data.area)
@@ -56,7 +55,6 @@ export function PropertyDetails({ property, setShowContactDetails, showContactDe
         }
 
         getPropertyData()
-        console.log("property:  ", property)
         currencyConversion(property.rentalPrice).then((usd) => setRentalPriceInUsd(usd))
         currencyConversion(property.depositAmount).then((usd) => setDepositInUsd(usd))
     }, [])

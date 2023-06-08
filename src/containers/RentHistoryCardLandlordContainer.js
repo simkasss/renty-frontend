@@ -115,7 +115,6 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
         }
 
         getDepositReleasePermission(rentContract.id).then((bool) => {
-            console.log(bool)
             setDepositReleasePermission(bool)
         })
 
@@ -127,7 +126,6 @@ export function RentHistoryCardLandlordContainer({ rentContract }) {
             getEmail(tenant)
             getPhoneNumber(tenant)
         })
-        console.log(rentContract.propertyNftId)
         getProperty(rentContract.propertyNftId).then((property) => {
             setProperty(property)
         })

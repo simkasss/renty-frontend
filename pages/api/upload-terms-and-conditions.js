@@ -36,8 +36,6 @@ export default async function handler(req, res) {
             res.status(500).json({ error: "Error pinning file to Pinata" })
         }
 
-        // Handle the file data here...
-        console.log("hash: ", hash)
         res.status(200).json({ hash })
     })
 }

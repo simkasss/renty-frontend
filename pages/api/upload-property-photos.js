@@ -39,8 +39,6 @@ export default async function handler(req, res) {
             }
         }
 
-        // Handle the file data here...
-        console.log("hashesOfPhotos: ", hashesOfPhotos)
         res.status(200).json({ hashesOfPhotos })
     })
 }

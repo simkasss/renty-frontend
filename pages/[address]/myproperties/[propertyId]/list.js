@@ -58,22 +58,18 @@ export default function List() {
                     return userProperty
                 })
                 setProperties(userProperties)
-                console.log(userProperties)
                 return userProperties
             }
         }
         async function getSelectedProperty(properties) {
             const property = properties.find((property) => property.propertyNftId == parseInt(id))
-            console.log("PROPERTY: ", property)
             return property
         }
 
         getUserProperties().then((properties) => {
             getSelectedProperty(properties).then((property) => {
                 setSelectedProperty(property)
-                console.log(selectedProperty, "selected")
                 setListPropertyData((data) => {
-                    console.log("data1", data)
                     data.name = property.name
                     data.depositAmount = property.depositAmount
                     data.rentalPrice = property.rentalPrice
@@ -149,7 +145,6 @@ export default function List() {
                 contentType: "multipart/form-data",
             }).then((response) => response.json())
 
-            console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse)
             console.log("hashesOfPhotosResponse: ", hashesOfPhotosResponse.hashesOfPhotos)
 
             setListPropertyData((data) => {
@@ -167,7 +162,6 @@ export default function List() {
                 contentType: "multipart/form-data",
             }).then((response) => response.json())
 
-            console.log("hashOfRentalTermsAndConditions Response: ", hashOfRentalTermsAndConditionsResponse)
             console.log("hashOfRentalTermsAndConditions Response 2:  ", hashOfRentalTermsAndConditionsResponse.hash)
 
             setListPropertyData((data) => {
@@ -194,7 +188,6 @@ export default function List() {
         setNumDays(event.target.value)
     }
     const handlePhotosChange = (e) => {
-        console.log("e.target.files: ", e.target.files)
         const files = Array.from(e.target.files)
         console.log("files: ", files)
         setSelectedPhotos(files)

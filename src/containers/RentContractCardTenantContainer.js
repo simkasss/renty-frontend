@@ -100,7 +100,7 @@ export function RentContractCardTenantContainer({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const owner = await contract.getPropertyOwner(rentContract.propertyNftId)
-            console.log("owner", owner)
+            console.log("Owner", owner)
             return owner
         }
         async function getEmail(owner) {
@@ -148,7 +148,6 @@ export function RentContractCardTenantContainer({ rentContract }) {
                 getDeposit(contract).then((deposit) => setDepositTransfered(deposit))
                 getPaidRent(contract).then((paidRent) => setTotalRentPaid(paidRent))
                 getDepositReleasePermission(contract).then((bool) => {
-                    console.log(bool)
                     setDepositReleasePermission(bool)
                 })
                 getRequiredPaidAmount().then((totalRequired) => setTotalRequiredRentAmount(totalRequired))

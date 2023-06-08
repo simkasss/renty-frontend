@@ -1,26 +1,23 @@
 import { useRouter } from "next/router"
-import Router from "next/router"
 import { PropertyDetails } from "@/components/PropertyDetails"
-import { getListedProperties } from "@/constants/blockchain"
 import React from "react"
 import { ethers } from "ethers"
 import networkMapping from "../../../constants/networkMapping.json"
 import mainContractAbi from "../../../constants/MainContract.json"
 import { useSelector } from "react-redux"
+import { structureProperties } from "../../../utilities/structureStructs"
 
-export default function Property({ listedProperties }) {
+export default function Property() {
     const router = useRouter()
     const { propertyId: id } = router.query
     const [showContactDetails, setShowContactDetails] = React.useState(false)
     const { conversionChecked } = useSelector((states) => states.globalStates)
-
     const [email, setEmail] = React.useState("")
     const [phoneNumber, setPhoneNumber] = React.useState("")
-    const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
-    console.log(selectedProperty)
+    const [selectedProperty, setSelectedProperty] = React.useState("")
 
     React.useEffect(() => {
-        if (typeof window == "undefined") {
+        if (typeof window == "undefined" || id == undefined) {
             return
         }
         async function getContract() {
@@ -34,8 +31,8 @@ export default function Property({ listedProperties }) {
             return contract
         }
 
-        async function getPropertyOwner(contract) {
-            const owner = await contract.getPropertyOwner(selectedProperty.propertyNftId)
+        async function getPropertyOwner(contract, property) {
+            const owner = await contract.getPropertyOwner(property.propertyNftId)
             return owner
         }
         async function getEmail(owner) {
@@ -47,7 +44,6 @@ export default function Property({ listedProperties }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(owner)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(owner) {
@@ -59,17 +55,28 @@ export default function Property({ listedProperties }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(owner)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
-        getContract().then((contract) => {
-            getPropertyOwner(contract).then((owner) => {
-                getEmail(owner)
-                getPhoneNumber(owner)
-            })
-        })
-    }, [])
+        async function getSelectedProperty(contract) {
+            const listedProperties = structureProperties(await contract.getListedProperties())
+            const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
+            setSelectedProperty(selectedProperty)
+            return selectedProperty
+        }
 
+        getContract().then((contract) => {
+            getSelectedProperty(contract).then((property) =>
+                getPropertyOwner(contract, property).then((owner) => {
+                    getEmail(owner)
+                    getPhoneNumber(owner)
+                })
+            )
+        })
+    }, [id])
+
+    if (!selectedProperty) {
+        return
+    }
     return (
         <>
             <PropertyDetails
@@ -82,11 +89,4 @@ export default function Property({ listedProperties }) {
             />
         </>
     )
-}
-
-export const getServerSideProps = async () => {
-    const data2 = await getListedProperties()
-    return {
-        props: { listedProperties: JSON.parse(JSON.stringify(data2)) },
-    }
 }
