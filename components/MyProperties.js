@@ -52,7 +52,7 @@ export default function MyProperties({ properties, handlePropertyClick, wallet, 
                                     </Button>
                                     {properties.length == 0 ? (
                                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                            You don't have any properties yet
+                                            You do not have any properties yet
                                         </Typography>
                                     ) : (
                                         <>
@@ -78,7 +78,7 @@ export default function MyProperties({ properties, handlePropertyClick, wallet, 
                                                 {properties
                                                     .filter((property) => property.isListed)
                                                     .map((property) => (
-                                                        <Grid item xs={2} sm={4} md={4}>
+                                                        <Grid item xs={2} sm={4} md={4} key={property.propertyNftId}>
                                                             <MyPropertyCard
                                                                 key={property.propertyNftId}
                                                                 property={property}
@@ -110,7 +110,7 @@ export default function MyProperties({ properties, handlePropertyClick, wallet, 
                                                 {properties
                                                     .filter((property) => !property.isListed)
                                                     .map((property) => (
-                                                        <Grid item xs={2} sm={4} md={4}>
+                                                        <Grid item xs={2} sm={4} md={4} key={property.propertyNftId}>
                                                             <MyPropertyCard
                                                                 key={property.propertyNftId}
                                                                 property={property}

@@ -79,7 +79,7 @@ export function MyRentals({
                                         {rentContracts.length > 0 ? (
                                             <Grid container spacing={{ xs: 2, md: 1 }} columns={{ xs: 4, sm: 8, md: 16 }}>
                                                 {rentContracts.map((rentContract) => (
-                                                    <Grid item xs={2} sm={4} md={4}>
+                                                    <Grid item xs={2} sm={4} md={4} key={rentContract.id}>
                                                         <RentApplicationCardTenant
                                                             key={rentContract.id}
                                                             rentContract={rentContract}
@@ -92,7 +92,7 @@ export function MyRentals({
                                             </Grid>
                                         ) : (
                                             <Typography variant="body2" component="div">
-                                                You don't have rent applications yet
+                                                You do not have rent applications yet
                                             </Typography>
                                         )}
                                     </>

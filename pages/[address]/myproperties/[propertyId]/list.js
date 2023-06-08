@@ -7,7 +7,7 @@ import mainContractAbi from "../../../../constants/MainContract.json"
 import { structureProperties } from "../../../../utilities/structureStructs"
 import { ListProperty } from "../../../../components/ListProperty"
 
-export default function listProperty() {
+export default function List() {
     const router = useRouter()
     const { propertyId: id } = router.query
     const { wallet } = useSelector((states) => states.globalStates)

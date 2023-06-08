@@ -8,6 +8,8 @@ import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
 import CircularProgress from "@mui/material/CircularProgress"
+import Alert from "@mui/material/Alert"
+import CheckIcon from "@mui/icons-material/Check"
 
 export function MintSBTCard({ handleSubmit, tenantName, setTenantName, alertMint, loadingMint }) {
     return (

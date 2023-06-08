@@ -295,7 +295,7 @@ export function RentContractCardLandlord({
                                             </Typography>
                                             <Grid container spacing={{ xs: 4, md: 4 }} columns={{ xs: 4, sm: 8, md: 24 }}>
                                                 {payments.map((payment) => (
-                                                    <Grid item xs={2} sm={5} md={8}>
+                                                    <Grid item xs={2} sm={5} md={8} key={payment.id}>
                                                         <Payment key={payment.id} payment={payment} />
                                                     </Grid>
                                                 ))}
@@ -356,7 +356,7 @@ export function RentContractCardLandlord({
                                             {solvedAlert ? <Alert icon={<CheckIcon fontSize="inherit" />}>Dispute is solved!</Alert> : <></>}
                                             <Grid container spacing={{ xs: 4, md: 4 }} columns={{ xs: 4, sm: 8, md: 24 }}>
                                                 {disputes.map((dispute) => (
-                                                    <Grid item xs={2} sm={5} md={8}>
+                                                    <Grid item xs={2} sm={5} md={8} key={dispute.id}>
                                                         <Dispute key={dispute.id} dispute={dispute} solveDispute={solveDispute} />
                                                     </Grid>
                                                 ))}
