@@ -9,9 +9,9 @@ import { useEffect, useState } from "react"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 
 export default function App({ Component, pageProps }) {
-    useEffect(() => {
-        monitorWalletConnection()
-    }, [])
+    // useEffect(() => {
+    //     monitorWalletConnection()
+    // }, [])
 
     return (
         <ThemeProvider theme={theme}>
