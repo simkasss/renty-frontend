@@ -7,7 +7,7 @@ require("dotenv").config()
 
 export default async function handler(req, res) {
     const sbtData = JSON.parse(req.body)
-    console.log("sbtData: ", sbtData)
+    console.log("SbtData: ", sbtData)
 
     const sbtDataHash = await uploadSBTDataToIPFS(sbtData)
 
@@ -24,7 +24,7 @@ async function uploadSBTDataToIPFS(sbtData) {
     const metadataUploadResponse = await storeMetadata(metadata)
     const dataHash = metadataUploadResponse.IpfsHash
 
-    console.log("uploaded data hash: ", dataHash)
+    console.log("Uploaded data hash: ", dataHash)
 
     return dataHash
 }

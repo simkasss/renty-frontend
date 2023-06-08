@@ -57,7 +57,6 @@ export default function MyPropertiesPage() {
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                 const email = await contract.getUserEmail(userAddress)
-                console.log(`Email: `, email)
                 setEmail(email)
             }
         }
@@ -71,14 +70,12 @@ export default function MyPropertiesPage() {
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                 const number = await contract.getUserPhoneNumber(userAddress)
-                console.log(`Phone Number: `, number)
                 setPhoneNumber(number)
             }
         }
 
         getUserProperties().then((properties) => {
             setProperties(properties)
-            console.log(properties)
         })
         getUserEmail()
         getUserPhoneNumber()

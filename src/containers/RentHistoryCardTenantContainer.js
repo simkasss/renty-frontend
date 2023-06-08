@@ -53,7 +53,6 @@ export function RentHistoryCardTenantContainer({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const owner = await contract.getPropertyOwner(rentContract.propertyNftId)
-            console.log("owner", owner)
             return owner
         }
         async function getEmail(owner) {
@@ -64,7 +63,6 @@ export function RentHistoryCardTenantContainer({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(owner)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(owner) {
@@ -75,7 +73,6 @@ export function RentHistoryCardTenantContainer({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(owner)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
 
@@ -111,7 +108,6 @@ export function RentHistoryCardTenantContainer({ rentContract }) {
             return ethers.utils.formatEther(transferedDepositAmount)
         }
         getDepositReleasePermission(rentContract.id).then((bool) => {
-            console.log(bool)
             setDepositReleasePermission(bool)
         })
 
@@ -123,7 +119,6 @@ export function RentHistoryCardTenantContainer({ rentContract }) {
             getEmail(owner)
             getPhoneNumber(owner)
         })
-        console.log(rentContract.propertyNftId)
         getProperty(rentContract.propertyNftId).then((property) => {
             setProperty(property)
         })

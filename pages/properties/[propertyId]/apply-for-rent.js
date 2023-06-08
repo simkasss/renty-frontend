@@ -1,5 +1,4 @@
 import { useRouter } from "next/router"
-import { getListedProperties } from "@/constants/blockchain"
 import React from "react"
 import { ethers } from "ethers"
 import networkMapping from "../../../constants/networkMapping.json"
@@ -7,15 +6,15 @@ import mainContractAbi from "../../../constants/MainContract.json"
 import tenantManagerAbi from "../../../constants/TenantManager.json"
 import { useSelector } from "react-redux"
 import { ApplyForm } from "../../../components/ApplyForm"
+import { structureProperties } from "../../../utilities/structureStructs"
 
-export default function ApplyForRent({ listedProperties }) {
+export default function ApplyForRent() {
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const router = useRouter()
     const { wallet } = useSelector((states) => states.globalStates)
     const { propertyId: id } = router.query
-    const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
-
+    const [selectedProperty, setSelectedProperty] = React.useState("")
     const [tenantId, setTenantId] = React.useState("")
     const [tenantName, setTenantName] = React.useState("")
     const [rentalTermSeconds, setRentalTermSeconds] = React.useState("year")
@@ -58,12 +57,25 @@ export default function ApplyForRent({ listedProperties }) {
         async function getTenantName(contract) {
             try {
                 const name = await contract.getTokenOwnerName(tenantId)
-                console.log(`Name: ${name}`)
                 return name
             } catch (e) {
                 console.log(e)
             }
         }
+        const getSelectedProperty = async () => {
+            ethereum = window.ethereum
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+            const mainContractAddress = networkMapping["11155111"].MainContract[0]
+            const contract = new ethers.Contract(mainContractAddress, mainContractAbi, signer)
+            const listedProperties = structureProperties(await contract.getListedProperties())
+            const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
+            return selectedProperty
+        }
+
+        getSelectedProperty().then((property) => {
+            setSelectedProperty(property)
+        })
 
         getContract().then((contract) => {
             getTokenId(contract)
@@ -72,7 +84,6 @@ export default function ApplyForRent({ listedProperties }) {
                 })
                 .then(() => getTenantName(contract).then((name) => setTenantName(name)))
         })
-        console.log(selectedProperty)
         setApplyFormData((prevData) => ({
             ...prevData,
             depositAmount: selectedProperty.depositAmount,
@@ -137,7 +148,6 @@ export default function ApplyForRent({ listedProperties }) {
         } else if (rentalTermSeconds === "custom") {
             rentalTerm = numDays * 24 * 60 * 60
         }
-        console.log(rentalTerm)
 
         const startDateTimestampInSeconds = Math.floor(new Date(applyFormData.startDate).getTime() / 1000)
 
@@ -146,7 +156,6 @@ export default function ApplyForRent({ listedProperties }) {
         const nowTimestampInSeconds = Math.floor(Date.now() / 1000)
 
         const validUntil = nowTimestampInSeconds + daysValidInSeconds
-        console.log("txData: ", rentalTerm, applyFormData.rentalPrice, applyFormData.depositAmount, startDateTimestampInSeconds, validUntil)
 
         await applyForRent(rentalTerm, applyFormData.rentalPrice, applyFormData.depositAmount, startDateTimestampInSeconds, validUntil)
     }
@@ -169,11 +178,4 @@ export default function ApplyForRent({ listedProperties }) {
             }}
         />
     )
-}
-
-export const getServerSideProps = async () => {
-    const data2 = await getListedProperties()
-    return {
-        props: { listedProperties: JSON.parse(JSON.stringify(data2)) },
-    }
 }

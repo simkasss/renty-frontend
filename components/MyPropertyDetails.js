@@ -40,7 +40,6 @@ export function MyPropertyDetails({ property, wallet, id, handleLinkClick, handl
             await fetch(url)
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data)
                     setNumberOfRooms(data.numberOfRooms)
                     setArea(data.area)
                     setFloor(data.floor)
@@ -58,7 +57,6 @@ export function MyPropertyDetails({ property, wallet, id, handleLinkClick, handl
                     await fetch(url)
                         .then((response) => response.json())
                         .then((data) => {
-                            console.log(data)
                             setPhotos((currentPhotos) => [...currentPhotos, data])
                         })
                         .catch((error) => console.error(error))

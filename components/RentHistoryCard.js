@@ -55,7 +55,6 @@ export function RentHistoryCard({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const email = await contract.getUserEmail(owner)
-            console.log(`Email: `, email)
             setEmail(email)
         }
         async function getPhoneNumber(owner) {
@@ -67,7 +66,6 @@ export function RentHistoryCard({ rentContract }) {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const number = await contract.getUserPhoneNumber(owner)
-            console.log(`Phone Number: `, number)
             setPhoneNumber(number)
         }
         getContract().then((contract) => {

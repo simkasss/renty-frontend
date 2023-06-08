@@ -34,7 +34,6 @@ export default function Account() {
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                 const email = await contract.getUserEmail(userAddress)
-                console.log(`Email: `, email)
                 setEmail(email)
             }
         }
@@ -48,7 +47,6 @@ export default function Account() {
                 const contractAbi = mainContractAbi
                 const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
                 const number = await contract.getUserPhoneNumber(userAddress)
-                console.log(`Phone Number: `, number)
                 setPhoneNumber(number)
             }
         }
@@ -67,7 +65,6 @@ export default function Account() {
         getUserPhoneNumber()
         getUserBalance().then((balance) => {
             setBalance(balance)
-            console.log("balance: ", balance)
         })
     }, [wallet])
 
@@ -81,7 +78,6 @@ export default function Account() {
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const addContactDetails = await contract.addContactDetails(_email, _phoneNumber)
             await addContactDetails.wait()
-            console.log(`Contact Details are added`)
             setAlert(true)
         }
     }
@@ -98,7 +94,6 @@ export default function Account() {
             const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
             const withdrawal = await contract.withdrawProceeds(userAddress, ethers.utils.parseEther(withdrawalAmount))
             await withdrawal.wait()
-            console.log(`Proceeds withdrawn`)
             setWithdrawAlert(true)
         }
     }

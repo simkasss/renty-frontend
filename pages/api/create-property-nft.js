@@ -11,7 +11,6 @@ const NFTSTORAGE_API_KEY = process.env.NFTSTORAGE_API_KEY
 
 export default async function handler(req, res) {
     const propertyNftData = JSON.parse(req.body)
-    console.log("propertyNftData", propertyNftData)
 
     const nftTokenURI = await uploadPropertyNftToStorage(propertyNftData)
 

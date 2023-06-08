@@ -48,7 +48,6 @@ export default function PropertyRentApplications() {
 
         async function getPropertyRentApplications(contract) {
             const propertyRentContracts = structureRentContracts(await contract.getPropertyRentContracts(propertyId))
-            console.log("propertyRentContracts: ", propertyRentContracts)
             return propertyRentContracts
         }
         async function getProperty(contract) {
@@ -59,7 +58,6 @@ export default function PropertyRentApplications() {
                 contract.getListedProperties(),
                 contract.getUserProperties(userAddress),
             ])
-            console.log("first", listedPropertiesResponse, userPropertiesResponse)
             const listedProperties = structureProperties(listedPropertiesResponse)
 
             const userProperties = structureProperties(userPropertiesResponse).map((userProperty) => {
@@ -74,14 +72,12 @@ export default function PropertyRentApplications() {
             })
             const properties = userProperties.filter((property) => property.propertyNftId == propertyId)
             const property = properties[0]
-            console.log(property)
             return property
         }
 
         getContract().then((contract) => {
             getPropertyRentApplications(contract).then((contracts) => {
                 setRentContracts(contracts)
-                console.log(contracts)
             })
             getProperty(contract).then((property) => {
                 setPropertyListed(property.isListed)
@@ -90,7 +86,6 @@ export default function PropertyRentApplications() {
     }, [propertyId])
 
     const acceptContract = async (rentContract) => {
-        console.log(rentContract)
         if (typeof window !== "undefined") {
             ethereum = window.ethereum
             const provider = new ethers.providers.Web3Provider(ethereum)
@@ -98,7 +93,6 @@ export default function PropertyRentApplications() {
             const mainContractAddress = networkMapping["11155111"].MainContract[0]
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
-            console.log(rentContract)
             const accept = await contract.acceptRentContract(rentContract.propertyNftId, rentContract.id)
             await accept.wait()
             setAlert(true)

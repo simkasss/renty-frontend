@@ -58,7 +58,6 @@ export default function Property() {
     if (!property) {
         return <div>Property not found</div>
     }
-    console.log(property)
     const handleLinkClick = (path) => {
         router.push(path)
     }

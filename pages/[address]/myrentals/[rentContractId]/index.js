@@ -144,7 +144,7 @@ export default function RentContract() {
             const contractAbi = mainContractAbi
             const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
             const owner = await contract.getPropertyOwner(rentContract.propertyNftId)
-            console.log("owner", owner)
+            console.log("Owner", owner)
             return owner
         }
         async function getEmail(owner) {
@@ -186,11 +186,9 @@ export default function RentContract() {
                     getTransfersAndDisputesContract()
                         .then((transfersAndDisputesContract) => {
                             getDisputes({ rentContract, transfersAndDisputesContract }).then((disputes) => setDisputes(disputes))
-                            console.log(disputes, "disputes")
                             getDeposit({ rentContract, transfersAndDisputesContract }).then((deposit) => setDepositTransfered(deposit))
                             getPaidRent({ rentContract, transfersAndDisputesContract }).then((paidRent) => setTotalRentPaid(paidRent))
                             getDepositReleasePermission({ rentContract, transfersAndDisputesContract }).then((bool) => {
-                                console.log(bool)
                                 setDepositReleasePermission(bool)
                             })
                             getRequiredPaidAmount(rentContract).then((requiredPaidAmount) => setTotalRequiredRentAmount(requiredPaidAmount))
@@ -214,7 +212,6 @@ export default function RentContract() {
         const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, provider)
 
         const payments = structurePayments(await contract.getRentContractPaymentHistory(rentContract.id))
-        console.log(payments)
         setPayments(payments)
 
         return payments
@@ -245,7 +242,6 @@ export default function RentContract() {
         const contract = new ethers.Contract(transfersAndDisputesAddress, contractAbi, signer)
         const solveDispute = await contract.solveDispute(rentContract.id, disputeId)
         await solveDispute.wait()
-        console.log("solved")
         setSolvedAlert(true)
     }
     async function transferDeposit() {
