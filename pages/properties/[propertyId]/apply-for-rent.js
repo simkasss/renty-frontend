@@ -8,6 +8,50 @@ import { useSelector } from "react-redux"
 import { ApplyForm } from "../../../components/ApplyForm"
 import { structureProperties } from "../../../utilities/structureStructs"
 
+async function getContract() {
+    try {
+        ethereum = window.ethereum
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
+        const contractAbi = tenantManagerAbi
+        const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
+        return contract
+    } catch (e) {
+        console.log(e)
+    }
+}
+const getSelectedProperty = async (id) => {
+    ethereum = window.ethereum
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const signer = provider.getSigner()
+    const mainContractAddress = networkMapping["11155111"].MainContract[0]
+    const contract = new ethers.Contract(mainContractAddress, mainContractAbi, signer)
+    const listedProperties = structureProperties(await contract.getListedProperties())
+    const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
+    return selectedProperty
+}
+
+async function getTokenId(contract) {
+    try {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const userAddress = provider.getSigner().getAddress()
+        const tokenId = await contract.getTokenId(userAddress)
+        console.log(`User has soulbound token. Token ID: ${tokenId}`)
+        return tokenId
+    } catch (e) {
+        console.log(e)
+    }
+}
+async function getTenantName(contract) {
+    try {
+        const name = await contract.getTokenOwnerName(tenantId)
+        return name
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 export default function ApplyForRent() {
     const [alert, setAlert] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
@@ -27,54 +71,15 @@ export default function ApplyForRent() {
     })
 
     React.useEffect(() => {
-        if (typeof window === "undefined") return
+        if (typeof window === "undefined" || id == undefined) return
 
-        async function getContract() {
-            try {
-                ethereum = window.ethereum
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const signer = provider.getSigner()
-                const tenantManagerAddress = networkMapping["11155111"].TenantManager[0]
-                const contractAbi = tenantManagerAbi
-                const contract = new ethers.Contract(tenantManagerAddress, contractAbi, signer)
-                return contract
-            } catch (e) {
-                console.log(e)
-            }
-        }
-
-        async function getTokenId(contract) {
-            try {
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const userAddress = provider.getSigner().getAddress()
-                const tokenId = await contract.getTokenId(userAddress)
-                console.log(`User has soulbound token. Token ID: ${tokenId}`)
-                return tokenId
-            } catch (e) {
-                console.log(e)
-            }
-        }
-        async function getTenantName(contract) {
-            try {
-                const name = await contract.getTokenOwnerName(tenantId)
-                return name
-            } catch (e) {
-                console.log(e)
-            }
-        }
-        const getSelectedProperty = async () => {
-            ethereum = window.ethereum
-            const provider = new ethers.providers.Web3Provider(ethereum)
-            const signer = provider.getSigner()
-            const mainContractAddress = networkMapping["11155111"].MainContract[0]
-            const contract = new ethers.Contract(mainContractAddress, mainContractAbi, signer)
-            const listedProperties = structureProperties(await contract.getListedProperties())
-            const selectedProperty = listedProperties.find((property) => property.propertyNftId === parseInt(id))
-            return selectedProperty
-        }
-
-        getSelectedProperty().then((property) => {
+        getSelectedProperty(id).then((property) => {
             setSelectedProperty(property)
+            setApplyFormData((prevData) => ({
+                ...prevData,
+                depositAmount: property.depositAmount,
+                rentalPrice: property.rentalPrice,
+            }))
         })
 
         getContract().then((contract) => {
@@ -84,15 +89,7 @@ export default function ApplyForRent() {
                 })
                 .then(() => getTenantName(contract).then((name) => setTenantName(name)))
         })
-        setApplyFormData((prevData) => ({
-            ...prevData,
-            depositAmount: selectedProperty.depositAmount,
-        }))
-        setApplyFormData((prevData) => ({
-            ...prevData,
-            rentalPrice: selectedProperty.rentalPrice,
-        }))
-    }, [tenantName])
+    }, [id])
 
     async function applyForRent(_rentalTerm, _rentalPrice, _depositAmount, _startDate, _daysValid) {
         try {
