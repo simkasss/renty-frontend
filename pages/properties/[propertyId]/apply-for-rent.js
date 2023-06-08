@@ -158,22 +158,23 @@ export default function ApplyForRent() {
         await applyForRent(rentalTerm, applyFormData.rentalPrice, applyFormData.depositAmount, startDateTimestampInSeconds, validUntil)
     }
 
-    return (
-        <ApplyForm
-            {...{
-                applyFormData,
-                setApplyFormData,
-                handleSubmit,
-                tenantId,
-                wallet,
-                tenantName,
-                alert,
-                loading,
-                rentalTermSeconds,
-                handleRentalTermChange,
-                numDays,
-                setNumDays,
-            }}
-        />
-    )
+    return "Hello world from apply-for-rent"
+    // return (
+    //     <ApplyForm
+    //         {...{
+    //             applyFormData,
+    //             setApplyFormData,
+    //             handleSubmit,
+    //             tenantId,
+    //             wallet,
+    //             tenantName,
+    //             alert,
+    //             loading,
+    //             rentalTermSeconds,
+    //             handleRentalTermChange,
+    //             numDays,
+    //             setNumDays,
+    //         }}
+    //     />
+    // )
 }
