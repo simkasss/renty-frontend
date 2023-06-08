@@ -92,38 +92,39 @@ export default function ApplyForRent() {
     }, [id])
 
     async function applyForRent(_rentalTerm, _rentalPrice, _depositAmount, _startDate, _daysValid) {
-        try {
-            if (typeof window !== "undefined") {
-                ethereum = window.ethereum
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const signer = provider.getSigner()
-                const mainContractAddress = networkMapping["11155111"].MainContract[0]
-                const contractAbi = mainContractAbi
-                const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
+        console.log("1")
+        // try {
+        //     if (typeof window !== "undefined") {
+        //         ethereum = window.ethereum
+        //         const provider = new ethers.providers.Web3Provider(ethereum)
+        //         const signer = provider.getSigner()
+        //         const mainContractAddress = networkMapping["11155111"].MainContract[0]
+        //         const contractAbi = mainContractAbi
+        //         const contract = new ethers.Contract(mainContractAddress, contractAbi, signer)
 
-                const propertyTx = await contract.createRentContract(
-                    selectedProperty.propertyNftId,
-                    tenantId,
-                    _rentalTerm,
-                    ethers.BigNumber.from(ethers.utils.parseUnits(_rentalPrice, 18)),
-                    ethers.BigNumber.from(ethers.utils.parseUnits(_depositAmount, 18)),
-                    _startDate,
-                    _daysValid
-                )
+        //         const propertyTx = await contract.createRentContract(
+        //             selectedProperty.propertyNftId,
+        //             tenantId,
+        //             _rentalTerm,
+        //             ethers.BigNumber.from(ethers.utils.parseUnits(_rentalPrice, 18)),
+        //             ethers.BigNumber.from(ethers.utils.parseUnits(_depositAmount, 18)),
+        //             _startDate,
+        //             _daysValid
+        //         )
 
-                const propertyTxReceipt = await propertyTx.wait()
-                const events = propertyTxReceipt.events
-                const rentContractCreatedEvent = events.find((e) => e.event === "RentContractCreated")
-                const rentContractId = rentContractCreatedEvent.args[1]
+        //         const propertyTxReceipt = await propertyTx.wait()
+        //         const events = propertyTxReceipt.events
+        //         const rentContractCreatedEvent = events.find((e) => e.event === "RentContractCreated")
+        //         const rentContractId = rentContractCreatedEvent.args[1]
 
-                console.log(`Rent Contract is created. Rent Contract ID: ${rentContractId}`)
-                setAlert(true)
-                router.push(`/${wallet}/myrentals`)
-                return rentContractId
-            }
-        } catch (e) {
-            console.log(e)
-        }
+        //         console.log(`Rent Contract is created. Rent Contract ID: ${rentContractId}`)
+        //         setAlert(true)
+        //         router.push(`/${wallet}/myrentals`)
+        //         return rentContractId
+        //     }
+        // } catch (e) {
+        //     console.log(e)
+        // }
     }
     const handleRentalTermChange = (event) => {
         setRentalTermSeconds(event.target.value)
