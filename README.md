@@ -1,3 +1,5 @@
+**Decentralized Real Estate Rent Platform**
+
 The backend repo: **https://github.com/simkasss/renty-backend**
 
 ## Getting Started
